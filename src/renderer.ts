@@ -120,9 +120,13 @@ function renderLoading(container: HTMLElement, config: GalleryConfig): void {
 	for (let index = 0; index < Math.min(config.count, 6); index += 1) gallery.createDiv({ cls: 'lrf-skeleton' });
 }
 
-function selectedInformation(film: FilmEntry, config: GalleryConfig): { title: string; details: string[] } {
+function selectedInformation(
+	film: FilmEntry,
+	config: GalleryConfig,
+	fallbackToTitle: boolean,
+): { title: string; details: string[] } {
 	const anySelected = config.showCaptions || config.showYear || config.showRating || config.showDate;
-	const title = config.showCaptions || !anySelected ? film.title : '';
+	const title = config.showCaptions || (fallbackToTitle && !anySelected) ? film.title : '';
 	const details: string[] = [];
 	if (config.showYear && film.year) details.push(String(film.year));
 	if (config.showRating && film.rating) details.push(formatRating(film.rating));
@@ -144,12 +148,6 @@ function renderFilm(gallery: HTMLElement, film: FilmEntry, config: GalleryConfig
 			'aria-label': `Open ${film.title}${year} on Letterboxd`,
 		},
 	});
-	if (config.count === 1 && film.posterUrl) {
-		figure.createEl('img', {
-			cls: 'lrf-card-backdrop',
-			attr: { src: film.posterUrl, alt: '', 'aria-hidden': 'true' },
-		});
-	}
 	figure.appendChild(link);
 	const frame = link.createDiv({ cls: 'lrf-poster-frame' });
 	frame.createDiv({ cls: 'lrf-poster-placeholder', text: film.title.slice(0, 1).toUpperCase() || 'Film' });
@@ -166,7 +164,7 @@ function renderFilm(gallery: HTMLElement, film: FilmEntry, config: GalleryConfig
 		});
 		image.addEventListener('error', () => image.addClass('is-unavailable'), { once: true });
 	}
-	const information = selectedInformation(film, config);
+	const information = selectedInformation(film, config, true);
 	if (information.title || information.details.length > 0) {
 		const caption = figure.createEl('figcaption', { cls: 'lrf-caption' });
 		if (information.title) caption.createDiv({ cls: 'lrf-title', text: information.title });
@@ -285,6 +283,14 @@ function renderCollage(
 		link.style.setProperty('top', percentage(cell.y, asset.height));
 		link.style.setProperty('width', percentage(cell.width, asset.width));
 		link.style.setProperty('height', percentage(cell.height, asset.height));
+		const information = selectedInformation(film, config, false);
+		if (information.title || information.details.length > 0) {
+			const tooltip = link.createDiv({ cls: 'lrf-collage-tooltip' });
+			if (information.title) tooltip.createDiv({ cls: 'lrf-collage-tooltip-title', text: information.title });
+			if (information.details.length > 0) {
+				tooltip.createDiv({ cls: 'lrf-collage-tooltip-meta', text: information.details.join(' · ') });
+			}
+		}
 	}
 	if (config.layout === 'strip') enableStripScrolling(scroll);
 }
@@ -453,7 +459,7 @@ export class GalleryView {
 	): void {
 		const button = parent.createEl('button', {
 			cls: `lrf-page-button lrf-page-${direction}`,
-			text: direction === 'previous' ? '← Previous' : 'Next →',
+			text: direction === 'previous' ? '‹' : '›',
 			attr: {
 				type: 'button',
 				'aria-label': `${direction === 'previous' ? 'Previous' : 'Next'} ${pageSize} films`,

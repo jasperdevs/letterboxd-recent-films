@@ -20,12 +20,17 @@ All notable changes to this project will be documented in this file.
 - Add configurable poster gaps and a command to copy the latest collage PNG.
 - Hide strip scrollbars while adding mouse-wheel, trackpad, and drag scrolling.
 - Add hover/focus previous and next controls that page through every available RSS entry in groups matching the film-count setting.
-- Add a full-width one-film feature layout with ambient poster artwork and longer title wrapping.
+- Give a one-film detailed card more room for its title and information.
 - Grow multi-film grids to use available width and center incomplete final rows for every count from 2–20.
 - Keep both navigation arrows and the current page number visible, with unavailable directions clearly disabled.
 - Simplify display settings to poster-only collage and information-rich detailed cards.
-- Replace overlay arrows with a permanent labeled navigation bar below every paginated gallery.
+- Replace the large navigation bar with minimal hover/focus arrows and a compact page indicator.
 - Give detailed cards responsive widths, longer titles, cleaner metadata spacing, and a dedicated one-film feature card.
+- Make Row and Grid layouts apply to both poster collages and detailed cards.
+- Add desktop drag resizing for the current gallery view.
+- Reveal only the enabled film-information fields when a collage poster is hovered or focused.
+- Apply the selected corner radius inside the generated collage image.
+- Remove the poster-derived fake backdrop from one-film layouts.
 
 ## 1.0.0 - 2026-08-05
 

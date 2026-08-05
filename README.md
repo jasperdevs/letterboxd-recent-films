@@ -34,9 +34,11 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-When the RSS feed contains more entries than `count`, a permanent navigation bar appears below the gallery with labeled previous/next buttons and the current page. Each step shows the next `count` films and continues until the saved feed has no older entries.
+When the RSS feed contains more entries than `count`, minimal previous/next arrows appear while the gallery is hovered or keyboard-focused. Each step shows the next `count` films and continues until the saved feed has no older entries. The arrows remain visible on touch devices.
 
-Grid layouts adapt to every count from 1–20. In detailed-card mode, a one-film page becomes a full-width feature card using the poster art as a blurred ambient background because the RSS feed does not provide separate backdrop artwork; its title can wrap across four lines. Larger pages use responsive cards with readable metadata. Poster collages contain posters only, grow them to use available width, cap them at 220 pixels, and center incomplete final rows.
+Both display styles support a horizontally scrolling **Row** and a responsive **Grid**. Detailed-card mode gives titles and metadata room to wrap. Poster collages contain posters only until a poster is hovered or keyboard-focused, when the enabled information fields appear over it. Grid collages grow posters to use available width, cap them at 220 pixels, and center incomplete final rows. A one-film collage is a centered poster rather than a simulated backdrop.
+
+On desktop, the gallery can also be resized for the current view by dragging its native resize handle at the lower-right edge. The saved Row/Grid, column, and poster-size settings remain the dependable way to choose a persistent layout.
 
 ## Block options
 
@@ -64,9 +66,11 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 ## Settings
 
-Global settings cover the username, films per page, poster-collage or detailed-card display, collage layout, responsive column maximum, poster gap, heading, card-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Settings that do not apply to the selected display style are hidden.
+Global settings cover the username, films per page, poster-collage or detailed-card display, Row/Grid layout, responsive column maximum, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout.
 
-**Poster collage** creates one image containing posters and no film text. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
+**Poster collage** creates one image containing posters, with selected film information available on hover or keyboard focus. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
+
+Poster URLs are taken directly from the image in each Letterboxd RSS entry. That preserves whichever poster Letterboxd exposes in the feed, but the plugin cannot guarantee that a member's custom-poster choice is represented because Letterboxd does not document that RSS detail. The feed does not provide a separate official backdrop, and the plugin does not request one from TMDB because that would require a separately authenticated API integration.
 
 **Test feed** requests the configured public feed immediately. **Clear cache** removes all saved feed results.
 

@@ -155,51 +155,22 @@ function drawCaption(
 	}
 }
 
-function drawImageCover(
+function withRoundedPoster(
 	context: CanvasRenderingContext2D,
-	image: HTMLImageElement,
+	x: number,
+	y: number,
 	width: number,
 	height: number,
+	radius: number,
+	draw: () => void,
 ): void {
-	const imageWidth = image.naturalWidth || image.width;
-	const imageHeight = image.naturalHeight || image.height;
-	const scale = Math.max(width / imageWidth, height / imageHeight);
-	const drawWidth = imageWidth * scale;
-	const drawHeight = imageHeight * scale;
-	context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
-}
-
-function drawFeaturedFilm(
-	context: CanvasRenderingContext2D,
-	film: FilmEntry,
-	poster: LoadedPoster | null | undefined,
-	layout: CollageLayout,
-	background: string,
-): void {
-	if (poster) {
-		context.save();
-		context.filter = 'blur(20px) brightness(0.42) saturate(0.9)';
-		context.translate(-24, -24);
-		drawImageCover(context, poster.image, layout.width + 48, layout.height + 48);
-		context.restore();
-	} else {
-		context.fillStyle = background;
-		context.fillRect(0, 0, layout.width, layout.height);
-	}
-
-	const fade = context.createLinearGradient(layout.posterWidth * 0.55, 0, layout.width, 0);
-	fade.addColorStop(0, 'rgba(0, 0, 0, 0.12)');
-	fade.addColorStop(0.45, 'rgba(0, 0, 0, 0.58)');
-	fade.addColorStop(1, 'rgba(0, 0, 0, 0.76)');
-	context.fillStyle = fade;
-	context.fillRect(0, 0, layout.width, layout.height);
-
-	if (poster) {
-		context.drawImage(poster.image, 0, 0, layout.posterWidth, layout.posterHeight);
-	} else {
-		drawPlaceholder(context, film, 0, 0, layout, background, '#999999');
-	}
-
+	const safeRadius = Math.max(0, Math.min(radius, width / 2, height / 2));
+	context.save();
+	context.beginPath();
+	context.roundRect(x, y, width, height, safeRadius);
+	context.clip();
+	draw();
+	context.restore();
 }
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -244,25 +215,16 @@ export async function createPosterCollage(
 	Array.from(posterRequests.keys()).forEach((url, index) => posters.set(url, loaded[index] ?? null));
 
 	try {
-		if (layout.featured) {
-			const film = films[0];
-			if (film) {
-				const poster = film.posterUrl ? posters.get(film.posterUrl) : null;
-				drawFeaturedFilm(context, film, poster, layout, background);
-			}
-		} else {
 		films.forEach((film, index) => {
 			const cell = getCollageCell(layout, index, films.length);
 			const { x, y } = cell;
 			const poster = film.posterUrl ? posters.get(film.posterUrl) : null;
-			if (poster) {
-				context.drawImage(poster.image, x, y, layout.posterWidth, layout.posterHeight);
-			} else {
-				drawPlaceholder(context, film, x, y, layout, background, mutedText);
-			}
+			withRoundedPoster(context, x, y, layout.posterWidth, layout.posterHeight, config.cornerRadius, () => {
+				if (poster) context.drawImage(poster.image, x, y, layout.posterWidth, layout.posterHeight);
+				else drawPlaceholder(context, film, x, y, layout, background, mutedText);
+			});
 			drawCaption(context, film, config, layout, x, y, background, primaryText, mutedText, fontFamily);
 		});
-		}
 
 		const output = await canvasBlob(canvas);
 		return { ...layout, blob: output };
@@ -290,6 +252,7 @@ export function collageCacheKey(
 		showRating: config.showRating,
 		showDate: config.showDate,
 		posterSize: config.posterSize,
+		cornerRadius: config.cornerRadius,
 		gap: config.gap,
 		theme: styles ? [
 			themeValue(styles, '--background-secondary', '#262626'),

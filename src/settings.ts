@@ -51,16 +51,17 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
+		new Setting(containerEl)
 			.setName('Layout')
-			.setDesc('Arrange the poster collage as a scrolling strip or balanced grid.')
+			.setDesc('Use a horizontally scrolling row or a wrapping grid.')
 			.addDropdown((dropdown) => dropdown
-				.addOption('strip', 'Strip')
+				.addOption('strip', 'Row')
 				.addOption('grid', 'Grid')
 				.setValue(this.plugin.settings.layout)
 				.onChange(async (value) => {
 					this.plugin.settings.layout = value === 'grid' ? 'grid' : 'strip';
 					await this.plugin.saveSettings();
+					this.renderSettings();
 				}));
 
 		new Setting(containerEl)
@@ -77,9 +78,9 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					this.renderSettings();
 				}));
 
-		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
+		if (this.plugin.settings.layout === 'grid') new Setting(containerEl)
 			.setName('Grid columns')
-			.setDesc('Maximum columns. The collage wraps before posters would become smaller than the selected size.')
+			.setDesc('Maximum number of posters or cards in each row. Narrow notes use fewer automatically.')
 			.addSlider((slider) => slider
 				.setLimits(2, 6, 1)
 				.setValue(this.plugin.settings.gridColumns)
@@ -88,9 +89,9 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
+		new Setting(containerEl)
 			.setName('Poster gap')
-			.setDesc('Space between posters in the collage.')
+			.setDesc('Space between posters or cards.')
 			.addDropdown((dropdown) => {
 				for (const gap of GAPS) dropdown.addOption(String(gap), `${gap} px`);
 				dropdown.setValue(String(this.plugin.settings.gap));
@@ -120,16 +121,16 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		if (this.plugin.settings.renderMode === 'gallery') {
-			new Setting(containerEl)
-				.setName('Card information')
-				.setDesc('Choose the information shown under posters in detailed-card mode.')
-				.setHeading();
-			this.addToggle('Show titles', 'Show complete film titles with room to wrap.', 'showCaptions');
-			this.addToggle('Show year', 'Show each film’s release year.', 'showYear');
-			this.addToggle('Show rating', 'Show the diary entry rating.', 'showRating');
-			this.addToggle('Show watched date', 'Show the diary watched date.', 'showDate');
-		}
+		new Setting(containerEl)
+			.setName('Film information')
+			.setDesc(this.plugin.settings.renderMode === 'gallery'
+				? 'Choose the information shown under detailed cards.'
+				: 'Choose the information revealed when a poster is hovered or focused.')
+			.setHeading();
+		this.addToggle('Show titles', 'Show film titles.', 'showCaptions');
+		this.addToggle('Show year', 'Show each film’s release year.', 'showYear');
+		this.addToggle('Show rating', 'Show the diary entry rating.', 'showRating');
+		this.addToggle('Show watched date', 'Show the diary watched date.', 'showDate');
 
 		new Setting(containerEl)
 			.setName('Poster size')

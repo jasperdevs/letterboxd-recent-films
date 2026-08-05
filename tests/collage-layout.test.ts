@@ -23,16 +23,16 @@ describe('poster collage layout', () => {
 		});
 	});
 
-	it('creates a full-width featured banner for one film', () => {
+	it('creates a centered poster instead of a fake backdrop for one film', () => {
 		const layout = getCollageLayout(1, { ...DEFAULT_SETTINGS, count: 1 }, 1, 720);
 		expect(layout).toMatchObject({
-			featured: true,
-			width: 720,
-			posterWidth: 240,
-			posterHeight: 360,
-			height: 360,
+			featured: false,
+			width: 260,
+			posterWidth: 260,
+			posterHeight: 390,
+			height: 390,
 		});
-		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 720, height: 360 });
+		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 260, height: 390 });
 	});
 
 	it('centers incomplete final rows instead of leaving an orphan on the left', () => {
