@@ -34,6 +34,25 @@ export function responsiveGridColumns(
 	return Math.max(1, Math.min(maximum, columnsThatFit));
 }
 
+export function balancedGridColumns(filmCount: number, maximum: number): number {
+	const safeCount = Math.max(1, filmCount);
+	const safeMaximum = Math.max(1, Math.min(maximum, safeCount));
+	let bestColumns = 1;
+	let bestScore = Number.POSITIVE_INFINITY;
+	for (let columns = 1; columns <= safeMaximum; columns += 1) {
+		const rows = Math.ceil(safeCount / columns);
+		const lastRow = safeCount - (rows - 1) * columns;
+		const orphanPenalty = lastRow === 1 && rows > 1 ? 1000 : 0;
+		const raggedPenalty = columns - lastRow;
+		const score = orphanPenalty + raggedPenalty + rows * 5;
+		if (score <= bestScore) {
+			bestScore = score;
+			bestColumns = columns;
+		}
+	}
+	return bestColumns;
+}
+
 export function getCollageLayout(
 	filmCount: number,
 	config: GalleryConfig,
@@ -59,7 +78,7 @@ export function getCollageLayout(
 	}
 	const columns = config.layout === 'strip'
 		? safeCount
-		: Math.min(columnOverride ?? Math.ceil(safeCount / config.gridRows), safeCount);
+		: Math.min(columnOverride ?? balancedGridColumns(safeCount, 6), safeCount);
 	const rows = Math.ceil(safeCount / columns);
 	const posterWidth = config.posterSize;
 	const posterHeight = Math.round(posterWidth * POSTER_ASPECT_RATIO);

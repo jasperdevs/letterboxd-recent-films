@@ -51,12 +51,13 @@
 }
 
 .lrf-render-gallery.lrf-layout-grid .lrf-gallery {
-	grid-auto-flow: row;
-	grid-template-columns: repeat(var(--lrf-page-columns), var(--lrf-poster-width));
-	overflow-x: auto;
-	overflow-y: hidden;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin-inline: auto;
+	max-width: 100%;
 	padding: 1px;
-	scrollbar-width: none;
+	width: var(--lrf-gallery-width);
 }
 
 .lrf-render-gallery.lrf-layout-strip .lrf-gallery {

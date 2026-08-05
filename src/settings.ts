@@ -28,6 +28,8 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
+		new Setting(containerEl).setName('Account').setHeading();
+
 		new Setting(containerEl)
 			.setName('Letterboxd username')
 			.setDesc('Public account used by blocks that do not specify a username.')
@@ -37,11 +39,27 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.username = value.trim();
 					await this.plugin.saveSettings();
+				}))
+			.addButton((button) => button
+				.setButtonText('Test')
+				.onClick(async () => {
+					if (!isValidUsername(this.plugin.settings.username)) {
+						new Notice('Enter a valid username first.');
+						return;
+					}
+					button.setDisabled(true).setButtonText('Testing…');
+					try {
+						await this.plugin.testFeed();
+					} finally {
+						button.setDisabled(false).setButtonText('Test');
+					}
 				}));
 
+		new Setting(containerEl).setName('Gallery').setHeading();
+
 		new Setting(containerEl)
-			.setName('Films per page')
-			.setDesc('Number shown at once (1–20). Navigation continues through older RSS entries.')
+			.setName('Movies shown')
+			.setDesc('Exact number displayed on each page (1–20). Older entries remain available with navigation.')
 			.addSlider((slider) => slider
 				.setLimits(1, 20, 1)
 				.setValue(this.plugin.settings.count)
@@ -77,16 +95,30 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					this.renderSettings();
 				}));
 
-		if (this.plugin.settings.layout === 'grid') new Setting(containerEl)
-			.setName('Grid height')
-			.setDesc('Number of poster rows. Extra films continue to the right instead of making the gallery taller.')
+		new Setting(containerEl).setName('Appearance').setHeading();
+
+		new Setting(containerEl)
+			.setName('Poster size')
+			.setDesc('Poster width from compact to large. Height adjusts proportionally.')
 			.addSlider((slider) => slider
-				.setLimits(1, 4, 1)
-				.setValue(this.plugin.settings.gridRows)
+				.setLimits(80, 220, 20)
+				.setValue(this.plugin.settings.posterSize)
 				.onChange(async (value) => {
-					this.plugin.settings.gridRows = value;
+					this.plugin.settings.posterSize = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Corner radius')
+			.setDesc('Rounds card posters, or only the outside edge of a complete collage.')
+			.addDropdown((dropdown) => {
+				for (const radius of CORNER_RADII) dropdown.addOption(String(radius), `${radius} px`);
+				dropdown.setValue(String(this.plugin.settings.cornerRadius));
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.cornerRadius = Number.parseInt(value, 10);
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Poster gap')
@@ -131,28 +163,7 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 		this.addToggle('Show rating', 'Show the diary entry rating.', 'showRating');
 		this.addToggle('Show watched date', 'Show the diary watched date.', 'showDate');
 
-		new Setting(containerEl)
-			.setName('Poster size')
-			.setDesc('Poster width from compact to large. Height adjusts proportionally.')
-			.addSlider((slider) => slider
-				.setLimits(80, 220, 20)
-				.setValue(this.plugin.settings.posterSize)
-				.onChange(async (value) => {
-					this.plugin.settings.posterSize = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Corner radius')
-			.setDesc('Rounds card posters, or only the outside edge of a complete collage.')
-			.addDropdown((dropdown) => {
-				for (const radius of CORNER_RADII) dropdown.addOption(String(radius), `${radius} px`);
-				dropdown.setValue(String(this.plugin.settings.cornerRadius));
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.cornerRadius = Number.parseInt(value, 10);
-					await this.plugin.saveSettings();
-				});
-			});
+		new Setting(containerEl).setName('Updates and cache').setHeading();
 
 		new Setting(containerEl)
 			.setName('Refresh policy')
@@ -166,9 +177,10 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					if (value === 'interval' || value === 'manual') this.plugin.settings.refreshPolicy = value;
 					else this.plugin.settings.refreshPolicy = 'open';
 					await this.plugin.saveSettings();
+					this.renderSettings();
 				}));
 
-		new Setting(containerEl)
+		if (this.plugin.settings.refreshPolicy === 'interval') new Setting(containerEl)
 			.setName('Refresh interval')
 			.setDesc('How long a response remains fresh when the interval policy is selected.')
 			.addDropdown((dropdown) => {
@@ -193,24 +205,6 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				});
 			});
-
-		new Setting(containerEl)
-			.setName('Test feed')
-			.setDesc('Request the current default user’s public RSS feed now.')
-			.addButton((button) => button
-				.setButtonText('Test feed')
-				.onClick(async () => {
-					if (!isValidUsername(this.plugin.settings.username)) {
-						new Notice('Enter a valid username first.');
-						return;
-					}
-					button.setDisabled(true).setButtonText('Testing…');
-					try {
-						await this.plugin.testFeed();
-					} finally {
-						button.setDisabled(false).setButtonText('Test feed');
-					}
-				}));
 
 		new Setting(containerEl)
 			.setName('Clear cache')

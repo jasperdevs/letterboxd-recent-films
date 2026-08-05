@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getCollageCell, getCollageLayout, responsiveGridColumns } from '../src/collage-layout';
+import { balancedGridColumns, getCollageCell, getCollageLayout, responsiveGridColumns } from '../src/collage-layout';
 import { DEFAULT_SETTINGS } from '../src/types';
 
 describe('poster collage layout', () => {
@@ -54,12 +54,11 @@ describe('poster collage layout', () => {
 		const layout = getCollageLayout(6, {
 			...DEFAULT_SETTINGS,
 			layout: 'grid',
-			gridRows: 2,
 			posterSize: 140,
 			informationStyle: 'captions',
 			showCaptions: true,
 			showRating: true,
-		});
+		}, 3);
 		expect(layout).toMatchObject({
 			columns: 3,
 			rows: 2,
@@ -77,5 +76,12 @@ describe('poster collage layout', () => {
 		expect(responsiveGridColumns(320, 6, 140, 4)).toBe(2);
 		expect(responsiveGridColumns(700, 6, 140, 4)).toBe(4);
 		expect(responsiveGridColumns(100, 6, 140, 4)).toBe(1);
+	});
+
+	it('balances common film counts without creating avoidable orphan rows', () => {
+		expect(balancedGridColumns(6, 5)).toBe(3);
+		expect(balancedGridColumns(7, 5)).toBe(4);
+		expect(balancedGridColumns(8, 5)).toBe(4);
+		expect(balancedGridColumns(20, 5)).toBe(5);
 	});
 });

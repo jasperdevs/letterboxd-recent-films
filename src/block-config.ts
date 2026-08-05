@@ -63,7 +63,6 @@ export function normalizeSettings(value: unknown): PluginSettings {
 		layout: layoutValue(input.layout, DEFAULT_SETTINGS.layout),
 		renderMode,
 		informationStyle: renderMode === 'gallery' ? 'cards' : 'none',
-		gridRows: finiteInteger(input.gridRows, DEFAULT_SETTINGS.gridRows, 1, 4),
 		gap: allowedNumber(input.gap, DEFAULT_SETTINGS.gap, GAPS),
 		heading: stringValue(input.heading, DEFAULT_SETTINGS.heading, 120),
 		showHeading: booleanValue(input.showHeading, DEFAULT_SETTINGS.showHeading),
@@ -137,11 +136,6 @@ export function parseBlockConfig(source: string): BlockOverrides {
 					overrides.renderMode = value === 'cards' ? 'gallery' : 'collage';
 				}
 				break;
-			case 'grid-rows': {
-				const parsed = parseInteger(value, 1, 4);
-				if (parsed !== undefined) overrides.gridRows = parsed;
-				break;
-			}
 			case 'gap': {
 				const parsed = parseAllowedInteger(value, GAPS);
 				if (parsed !== undefined) overrides.gap = parsed;
