@@ -4,6 +4,8 @@ Show a Letterboxd user's latest public diary entries as one clickable poster col
 
 This is an unofficial community plugin. It is not affiliated with, endorsed by, or connected to Letterboxd or Obsidian.
 
+![Letterboxd Recent Films poster collage in Obsidian](assets/gallery-preview.png)
+
 ## Install and set up
 
 After installing the plugin, enable **Letterboxd Recent Films** under **Settings → Community plugins**. Open the plugin settings and enter a public Letterboxd username. Usernames are validated using Letterboxd's documented rule: 2–15 letters, numbers, or underscores.
