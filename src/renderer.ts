@@ -136,7 +136,7 @@ function selectedInformation(
 
 function renderFilm(gallery: HTMLElement, film: FilmEntry, config: GalleryConfig): void {
 	const figure = gallery.createEl('figure', {
-		cls: config.count === 1 ? 'lrf-film lrf-film-feature' : 'lrf-film',
+		cls: 'lrf-film',
 	});
 	const year = film.year ? ` (${film.year})` : '';
 	const link = figure.createEl('a', {
@@ -200,6 +200,12 @@ function renderGallery(
 		return;
 	}
 	const gallery = container.createDiv({ cls: 'lrf-gallery' });
+	if (config.layout === 'grid') {
+		gallery.style.setProperty(
+			'--lrf-gallery-max-width',
+			`${config.gridColumns * config.posterSize + Math.max(0, config.gridColumns - 1) * config.gap}px`,
+		);
+	}
 	for (const film of films) renderFilm(gallery, film, config);
 }
 
@@ -303,6 +309,7 @@ export class GalleryView {
 	private lastColumns = 0;
 	private lastCompositionWidth = 0;
 	private resizeTimer: number | null = null;
+	private posterSizeOverride: number | null = null;
 	private readonly resizeObserver: ResizeObserver | null;
 
 	constructor(
@@ -320,7 +327,7 @@ export class GalleryView {
 
 	async refresh(force = false): Promise<void> {
 		const currentRun = ++this.run;
-		const config = resolveGalleryConfig(this.source, this.getSettings());
+		const config = this.currentConfig();
 		if (!config.username) {
 			this.renderError(config, 'Add a Letterboxd username', 'Set a default username in plugin settings or add one to this block.');
 			return;
@@ -370,6 +377,7 @@ export class GalleryView {
 			if (config.renderMode === 'gallery' || films.length === 0) {
 				renderGallery(this.container, result, config, films);
 				this.addPaginationControls(config, result.films.length);
+				if (films.length > 0) this.addPosterSizeControl(config);
 			} else {
 				const compositionWidth = this.compositionWidth(config);
 				this.lastCompositionWidth = compositionWidth ?? 0;
@@ -397,6 +405,11 @@ export class GalleryView {
 		if (this.resizeTimer !== null) this.container.ownerDocument.defaultView?.clearTimeout(this.resizeTimer);
 	}
 
+	private currentConfig(): GalleryConfig {
+		const config = resolveGalleryConfig(this.source, this.getSettings());
+		return this.posterSizeOverride === null ? config : { ...config, posterSize: this.posterSizeOverride };
+	}
+
 	private effectiveColumns(config: GalleryConfig): number {
 		if (config.layout === 'strip') return config.count;
 		const width = this.availableWidth();
@@ -414,7 +427,7 @@ export class GalleryView {
 
 	private handleResize(): void {
 		if (this.disposed) return;
-		const config = resolveGalleryConfig(this.source, this.getSettings());
+		const config = this.currentConfig();
 		const columns = this.effectiveColumns(config);
 		const compositionWidth = this.compositionWidth(config) ?? 0;
 		if (columns === this.lastColumns && compositionWidth === this.lastCompositionWidth) return;
@@ -436,6 +449,41 @@ export class GalleryView {
 		const url = this.runtime.collages.objectUrl(key, this.container.ownerDocument);
 		renderCollage(this.container, result, config, films, asset, url);
 		this.addPaginationControls(config, result.films.length);
+		this.addPosterSizeControl(config);
+	}
+
+	private addPosterSizeControl(config: GalleryConfig): void {
+		const control = this.container.createEl('label', {
+			cls: 'lrf-size-control',
+			attr: { title: 'Resize posters proportionally' },
+		});
+		control.createSpan({ cls: 'lrf-size-label', text: 'Size' });
+		const slider = control.createEl('input', {
+			cls: 'lrf-size-slider',
+			attr: {
+				type: 'range',
+				min: '80',
+				max: '220',
+				step: '20',
+				value: String(config.posterSize),
+				'aria-label': 'Poster size',
+			},
+		});
+		slider.addEventListener('input', () => {
+			const value = Number.parseInt(slider.value, 10);
+			if (!Number.isFinite(value) || value === this.posterSizeOverride) return;
+			this.posterSizeOverride = value;
+			for (const className of Array.from(this.container.classList)) {
+				if (className.startsWith('lrf-poster-')) this.container.removeClass(className);
+			}
+			this.container.addClass(`lrf-poster-${value}`);
+			const gallery = this.container.querySelector<HTMLElement>('.lrf-gallery');
+			gallery?.style.setProperty(
+				'--lrf-gallery-max-width',
+				`${config.gridColumns * value + Math.max(0, config.gridColumns - 1) * config.gap}px`,
+			);
+		});
+		slider.addEventListener('change', () => void this.refresh(false));
 	}
 
 	private addPaginationControls(config: GalleryConfig, totalFilms: number): void {
@@ -476,7 +524,7 @@ export class GalleryView {
 	private async changePage(delta: number): Promise<void> {
 		const result = this.lastResult;
 		if (!result) return;
-		const config = resolveGalleryConfig(this.source, this.getSettings());
+		const config = this.currentConfig();
 		const lastPage = pageCount(result.films.length, config.count) - 1;
 		const nextPage = Math.max(0, Math.min(lastPage, this.page + delta));
 		if (nextPage === this.page) return;
@@ -486,6 +534,7 @@ export class GalleryView {
 		if (config.renderMode === 'gallery' || films.length === 0) {
 			renderGallery(this.container, result, config, films);
 			this.addPaginationControls(config, result.films.length);
+			if (films.length > 0) this.addPosterSizeControl(config);
 			this.notifyLayout();
 			return;
 		}

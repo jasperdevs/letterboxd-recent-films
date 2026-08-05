@@ -38,7 +38,7 @@ When the RSS feed contains more entries than `count`, minimal previous/next arro
 
 Both display styles support a horizontally scrolling **Row** and a responsive **Grid**. Detailed-card mode gives titles and metadata room to wrap. Poster collages contain posters only until a poster is hovered or keyboard-focused, when the enabled information fields appear over it. Grid collages grow posters to use available width, cap them at 220 pixels, and center incomplete final rows. A one-film collage is a centered poster rather than a simulated backdrop.
 
-On desktop, the gallery can also be resized for the current view by dragging its native resize handle at the lower-right edge. The saved Row/Grid, column, and poster-size settings remain the dependable way to choose a persistent layout.
+On desktop, hover the gallery and drag the compact **Size** slider to scale posters proportionally for the current view. Poster height follows poster width, so resizing never crops the gallery. The saved poster-size setting remains the persistent default.
 
 ## Block options
 

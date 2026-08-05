@@ -27,10 +27,12 @@ All notable changes to this project will be documented in this file.
 - Replace the large navigation bar with minimal hover/focus arrows and a compact page indicator.
 - Give detailed cards responsive widths, longer titles, cleaner metadata spacing, and a dedicated one-film feature card.
 - Make Row and Grid layouts apply to both poster collages and detailed cards.
-- Add desktop drag resizing for the current gallery view.
+- Add a hover-only proportional poster-size slider for the current gallery view.
 - Reveal only the enabled film-information fields when a collage poster is hovered or focused.
 - Apply the selected corner radius inside the generated collage image.
 - Remove the poster-derived fake backdrop from one-film layouts.
+- Keep one-film pages at the same selected poster size as every other page.
+- Replace heavy collage information tags with softer, compact hover surfaces and improved text wrapping.
 
 ## 1.0.0 - 2026-08-05
 

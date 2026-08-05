@@ -42,7 +42,7 @@ export function getCollageLayout(
 ): CollageLayout {
 	const safeCount = Math.max(1, filmCount);
 	if (safeCount === 1 && config.count === 1) {
-		const posterWidth = Math.min(260, Math.max(config.posterSize, Math.round(availableWidth ?? config.posterSize)));
+		const posterWidth = config.posterSize;
 		const posterHeight = Math.round(posterWidth * POSTER_ASPECT_RATIO);
 		return {
 			featured: false,
