@@ -45,6 +45,13 @@ export default defineConfig(
 		},
 	},
 	{
+		files: ['src/collage.ts', 'src/live-preview.ts'],
+		rules: {
+			// Detached elements must be created in the render target's document, including popout windows.
+			'obsidianmd/prefer-create-el': 'off',
+		},
+	},
+	{
 		files: ['tests/**/*.ts', 'vitest.config.ts'],
 		languageOptions: {
 			globals: {

@@ -62,4 +62,16 @@ describe('feed cache', () => {
 		expect(result.source).toBe('stale');
 		expect(result.films).toEqual([film]);
 	});
+
+	it('keeps a saved result indefinitely for manual refresh policy', async () => {
+		const fetchFilms = vi.fn(async () => [film]);
+		const cache = new FeedCache(
+			{ example_user: { films: [film], fetchedAt: 1 } },
+			async () => undefined,
+			() => 999_999,
+		);
+		const result = await cache.get('example_user', Number.POSITIVE_INFINITY, fetchFilms);
+		expect(result.source).toBe('cache');
+		expect(fetchFilms).not.toHaveBeenCalled();
+	});
 });

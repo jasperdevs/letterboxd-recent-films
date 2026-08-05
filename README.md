@@ -1,6 +1,6 @@
 # Letterboxd Recent Films
 
-Show a Letterboxd user's latest public diary entries as clickable movie posters inside any Obsidian note. Galleries can use a horizontal strip or responsive grid, inherit your Obsidian theme, and keep the last successful feed result available offline.
+Show a Letterboxd user's latest public diary entries as a clickable poster collage inside any Obsidian note. By default, the plugin composes the posters into one PNG image in memory and wraps it into as many full-width posters as the note can fit. It can alternatively use a full-size scrolling strip or separate poster cards, add optional film information, inherit your Obsidian theme, and keep the last successful feed result available offline.
 
 This is an unofficial community plugin. It is not affiliated with, endorsed by, or connected to Letterboxd or Obsidian.
 
@@ -21,7 +21,9 @@ Or override settings for one gallery:
 ```letterboxd-recent
 username: movie_fan
 count: 6
-layout: strip
+layout: grid
+information-style: none
+gap: 2
 heading: Recently watched
 show-captions: false
 show-rating: false
@@ -30,6 +32,11 @@ show-date: false
 ````
 
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
+The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
+
+When the RSS feed contains more entries than `count`, a permanent navigation bar appears below the gallery with labeled previous/next buttons and the current page. Each step shows the next `count` films and continues until the saved feed has no older entries.
+
+Grid layouts adapt to every count from 1–20. In detailed-card mode, a one-film page becomes a full-width feature card using the poster art as a blurred ambient background because the RSS feed does not provide separate backdrop artwork; its title can wrap across four lines. Larger pages use responsive cards with readable metadata. Poster collages contain posters only, grow them to use available width, cap them at 220 pixels, and center incomplete final rows.
 
 ## Block options
 
@@ -40,7 +47,9 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | `username` | A valid public Letterboxd username |
 | `count` | `1`–`20` |
 | `layout` | `strip` or `grid` |
-| `grid-columns` | `2`–`8` |
+| `render-mode` | `collage` for poster-only output or `gallery` for detailed cards |
+| `grid-columns` | `2`–`6` |
+| `gap` | `0`, `2`, `4`, or `8` pixels |
 | `heading` | Plain text, up to 120 characters |
 | `show-heading` | `true` or `false` |
 | `show-captions` | `true` or `false` |
@@ -50,11 +59,14 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | `poster-size` | `80`, `100`, `120`, `140`, `160`, `180`, `200`, or `220` |
 | `corner-radius` | `0`, `4`, `6`, `8`, `12`, or `16` |
 | `refresh-interval` | `5`, `15`, `30`, `60`, `180`, `360`, `720`, or `1440` minutes |
+| `refresh-policy` | `open`, `interval`, or `manual` |
 | `timeout` | `5`, `10`, `15`, `20`, or `30` seconds |
 
 ## Settings
 
-Global settings cover the username, film count, strip/grid layout, grid columns, heading text and visibility, captions, year, rating, watched date, poster size, corner radius, refresh interval, and request timeout.
+Global settings cover the username, films per page, poster-collage or detailed-card display, collage layout, responsive column maximum, poster gap, heading, card-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Settings that do not apply to the selected display style are hidden.
+
+**Poster collage** creates one image containing posters and no film text. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
 
 **Test feed** requests the configured public feed immediately. **Clear cache** removes all saved feed results.
 
@@ -64,16 +76,21 @@ Global settings cover the username, film count, strip/grid layout, grid columns,
 - **Insert gallery at top of current note** places a block after YAML frontmatter when present. It does nothing when the note already contains a `letterboxd-recent` block.
 - **Refresh galleries** bypasses the freshness interval and updates all rendered galleries.
 - **Clear cache** removes saved RSS results.
+- **Copy collage image** copies the latest rendered collage as a PNG when the device clipboard supports images.
 
 ## Loading and offline behavior
 
-The plugin requests `https://letterboxd.com/{username}/rss/` with Obsidian's supported `requestUrl` API, which works on desktop and mobile. It caches parsed diary metadata per username and shares one in-flight request between duplicate blocks. When a refresh fails, the last successful result remains visible with an offline notice.
+The plugin requests `https://letterboxd.com/{username}/rss/` with Obsidian's supported `requestUrl` API, which works on desktop and mobile. It caches parsed diary metadata per username and shares one in-flight request between duplicate blocks. It also reuses the same completed collage image and object URL in memory so Live Preview focus changes do not flash a loader, decode another image, or redraw the collage. When a refresh fails, the last successful result remains visible with an offline notice.
+
+The recommended **When a gallery is viewed** refresh policy checks the feed when you open/view a gallery and suppresses duplicate requests caused by quick Live Preview remounts. **After the cache interval** uses the selected freshness interval. **Manual only** uses the last saved result until you run **Refresh galleries**; it still makes an initial request when no saved result exists. None of these policies polls Letterboxd in the background.
+
+In strip layout, posters retain their selected pixel size. Scroll horizontally with a trackpad, the mouse wheel, or click-and-drag; the decorative scrollbar is hidden.
 
 The gallery includes dedicated loading, empty, offline, missing-user, timeout, malformed-feed, and invalid-username states. Missing or failed posters use placeholders. Images are lazy-loaded and are never downloaded into the vault.
 
 ## Privacy and security
 
-The plugin sends the configured username to Letterboxd only to request that account's public RSS feed. Poster images are loaded directly from Letterboxd's image hosts by Obsidian. Parsed feed metadata and poster URLs are stored in the plugin's `data.json` so the last good result can work offline; depending on your sync configuration, that file may sync with your vault settings.
+The plugin sends the configured username to Letterboxd only to request that account's public RSS feed. Poster bytes are requested from Letterboxd's image hosts and combined into the collage in memory. The generated image is not written into the vault. Parsed feed metadata and poster URLs are stored in the plugin's `data.json` so the last good result can work offline; depending on your sync configuration, that file may sync with your vault settings.
 
 There is no login, analytics, telemetry, advertising, cookie access, page scraping, private API use, or remote code. RSS description HTML is never rendered. The parser extracts only trusted HTTPS poster URLs and builds the interface with safe DOM methods.
 

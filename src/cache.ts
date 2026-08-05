@@ -75,6 +75,10 @@ export class FeedCache {
 		return this.entries;
 	}
 
+	peek(username: string): CacheEntry | undefined {
+		return this.entries[username.toLowerCase()];
+	}
+
 	async get(
 		username: string,
 		maxAgeMilliseconds: number,
@@ -83,12 +87,11 @@ export class FeedCache {
 	): Promise<CacheResult> {
 		const key = username.toLowerCase();
 		const cached = this.entries[key];
+		const existing = this.inFlight.get(key);
+		if (existing) return existing;
 		if (!force && cached && this.now() - cached.fetchedAt < maxAgeMilliseconds) {
 			return { ...cached, source: 'cache' };
 		}
-
-		const existing = this.inFlight.get(key);
-		if (existing) return existing;
 
 		const request = this.fetchAndStore(key, cached, fetchFilms);
 		this.inFlight.set(key, request);

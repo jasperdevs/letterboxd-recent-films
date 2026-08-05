@@ -1,12 +1,15 @@
 import {
 	CORNER_RADII,
 	DEFAULT_SETTINGS,
+	GAPS,
 	POSTER_SIZES,
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
 	type GalleryConfig,
 	type GalleryLayout,
 	type PluginSettings,
+	type RefreshPolicy,
+	type RenderMode,
 } from './types';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9_]{2,15}$/;
@@ -43,13 +46,25 @@ function layoutValue(value: unknown, fallback: GalleryLayout): GalleryLayout {
 	return value === 'strip' || value === 'grid' ? value : fallback;
 }
 
+function renderModeValue(value: unknown, fallback: RenderMode): RenderMode {
+	return value === 'collage' || value === 'gallery' ? value : fallback;
+}
+
+function refreshPolicyValue(value: unknown, fallback: RefreshPolicy): RefreshPolicy {
+	return value === 'open' || value === 'interval' || value === 'manual' ? value : fallback;
+}
+
 export function normalizeSettings(value: unknown): PluginSettings {
 	const input = isRecord(value) ? value : {};
+	const renderMode = renderModeValue(input.renderMode, DEFAULT_SETTINGS.renderMode);
 	return {
 		username: stringValue(input.username, DEFAULT_SETTINGS.username, 15).trim(),
 		count: finiteInteger(input.count, DEFAULT_SETTINGS.count, 1, 20),
 		layout: layoutValue(input.layout, DEFAULT_SETTINGS.layout),
-		gridColumns: finiteInteger(input.gridColumns, DEFAULT_SETTINGS.gridColumns, 2, 8),
+		renderMode,
+		informationStyle: renderMode === 'gallery' ? 'cards' : 'none',
+		gridColumns: finiteInteger(input.gridColumns, DEFAULT_SETTINGS.gridColumns, 2, 6),
+		gap: allowedNumber(input.gap, DEFAULT_SETTINGS.gap, GAPS),
 		heading: stringValue(input.heading, DEFAULT_SETTINGS.heading, 120),
 		showHeading: booleanValue(input.showHeading, DEFAULT_SETTINGS.showHeading),
 		showCaptions: booleanValue(input.showCaptions, DEFAULT_SETTINGS.showCaptions),
@@ -63,6 +78,7 @@ export function normalizeSettings(value: unknown): PluginSettings {
 			DEFAULT_SETTINGS.refreshIntervalMinutes,
 			REFRESH_INTERVALS,
 		),
+		refreshPolicy: refreshPolicyValue(input.refreshPolicy, DEFAULT_SETTINGS.refreshPolicy),
 		timeoutSeconds: allowedNumber(
 			input.timeoutSeconds,
 			DEFAULT_SETTINGS.timeoutSeconds,
@@ -109,9 +125,26 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			case 'layout':
 				if (value === 'strip' || value === 'grid') overrides.layout = value;
 				break;
+			case 'render-mode':
+				if (value === 'collage' || value === 'gallery') {
+					overrides.renderMode = value;
+					if (value === 'gallery') overrides.informationStyle = 'cards';
+				}
+				break;
+			case 'information-style':
+				if (value === 'none' || value === 'hover' || value === 'captions' || value === 'cards') {
+					overrides.informationStyle = value;
+					overrides.renderMode = value === 'cards' ? 'gallery' : 'collage';
+				}
+				break;
 			case 'grid-columns': {
-				const parsed = parseInteger(value, 2, 8);
+				const parsed = parseInteger(value, 2, 6);
 				if (parsed !== undefined) overrides.gridColumns = parsed;
+				break;
+			}
+			case 'gap': {
+				const parsed = parseAllowedInteger(value, GAPS);
+				if (parsed !== undefined) overrides.gap = parsed;
 				break;
 			}
 			case 'heading':
@@ -136,6 +169,11 @@ export function parseBlockConfig(source: string): BlockOverrides {
 				if (parsed !== undefined) overrides.refreshIntervalMinutes = parsed;
 				break;
 			}
+			case 'refresh-policy':
+				if (value === 'open' || value === 'interval' || value === 'manual') {
+					overrides.refreshPolicy = value;
+				}
+				break;
 			case 'timeout': {
 				const parsed = parseAllowedInteger(value, TIMEOUT_SECONDS);
 				if (parsed !== undefined) overrides.timeoutSeconds = parsed;

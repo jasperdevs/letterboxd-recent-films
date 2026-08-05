@@ -2,6 +2,7 @@ import { Notice, PluginSettingTab, Setting } from 'obsidian';
 import { isValidUsername } from './block-config';
 import {
 	CORNER_RADII,
+	GAPS,
 	POSTER_SIZES,
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
@@ -21,6 +22,10 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		this.renderSettings();
+	}
+
+	private renderSettings(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 
@@ -36,8 +41,8 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Film count')
-			.setDesc('Number of diary entries to show (1–20).')
+			.setName('Films per page')
+			.setDesc('Number shown at once (1–20). Navigation continues through older RSS entries.')
 			.addSlider((slider) => slider
 				.setLimits(1, 20, 1)
 				.setValue(this.plugin.settings.count)
@@ -46,9 +51,9 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
 			.setName('Layout')
-			.setDesc('Show one scrolling strip or a wrapping grid.')
+			.setDesc('Arrange the poster collage as a scrolling strip or balanced grid.')
 			.addDropdown((dropdown) => dropdown
 				.addOption('strip', 'Strip')
 				.addOption('grid', 'Grid')
@@ -59,15 +64,41 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Display style')
+			.setDesc('Use one poster-only collage image or separate cards with readable film information.')
+			.addDropdown((dropdown) => dropdown
+				.addOption('collage', 'Poster collage')
+				.addOption('gallery', 'Detailed cards')
+				.setValue(this.plugin.settings.renderMode)
+				.onChange(async (value) => {
+					this.plugin.settings.renderMode = value === 'gallery' ? 'gallery' : 'collage';
+					this.plugin.settings.informationStyle = value === 'gallery' ? 'cards' : 'none';
+					await this.plugin.saveSettings();
+					this.renderSettings();
+				}));
+
+		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
 			.setName('Grid columns')
-			.setDesc('Maximum desktop columns for the grid layout. Phones use two columns.')
+			.setDesc('Maximum columns. The collage wraps before posters would become smaller than the selected size.')
 			.addSlider((slider) => slider
-				.setLimits(2, 8, 1)
+				.setLimits(2, 6, 1)
 				.setValue(this.plugin.settings.gridColumns)
 				.onChange(async (value) => {
 					this.plugin.settings.gridColumns = value;
 					await this.plugin.saveSettings();
 				}));
+
+		if (this.plugin.settings.renderMode === 'collage') new Setting(containerEl)
+			.setName('Poster gap')
+			.setDesc('Space between posters in the collage.')
+			.addDropdown((dropdown) => {
+				for (const gap of GAPS) dropdown.addOption(String(gap), `${gap} px`);
+				dropdown.setValue(String(this.plugin.settings.gap));
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.gap = Number.parseInt(value, 10);
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Show heading')
@@ -89,14 +120,20 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		this.addToggle('Show captions', 'Show each film title below its poster.', 'showCaptions');
-		this.addToggle('Show year', 'Show the release year below each poster.', 'showYear');
-		this.addToggle('Show rating', 'Show the diary entry rating below each poster.', 'showRating');
-		this.addToggle('Show watched date', 'Show the watched date below each poster.', 'showDate');
+		if (this.plugin.settings.renderMode === 'gallery') {
+			new Setting(containerEl)
+				.setName('Card information')
+				.setDesc('Choose the information shown under posters in detailed-card mode.')
+				.setHeading();
+			this.addToggle('Show titles', 'Show complete film titles with room to wrap.', 'showCaptions');
+			this.addToggle('Show year', 'Show each film’s release year.', 'showYear');
+			this.addToggle('Show rating', 'Show the diary entry rating.', 'showRating');
+			this.addToggle('Show watched date', 'Show the diary watched date.', 'showDate');
+		}
 
 		new Setting(containerEl)
 			.setName('Poster size')
-			.setDesc('Poster width in pixels. Grid posters may shrink on narrow screens.')
+			.setDesc('Preferred poster width. Grid posters can grow to fill space but never exceed 220 px.')
 			.addDropdown((dropdown) => {
 				for (const size of POSTER_SIZES) dropdown.addOption(String(size), `${size} px`);
 				dropdown.setValue(String(this.plugin.settings.posterSize));
@@ -119,8 +156,22 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName('Refresh policy')
+			.setDesc('Choose when the public feed is requested. There is no background polling.')
+			.addDropdown((dropdown) => dropdown
+				.addOption('open', 'When a gallery is viewed')
+				.addOption('interval', 'After the cache interval')
+				.addOption('manual', 'Manual only')
+				.setValue(this.plugin.settings.refreshPolicy)
+				.onChange(async (value) => {
+					if (value === 'interval' || value === 'manual') this.plugin.settings.refreshPolicy = value;
+					else this.plugin.settings.refreshPolicy = 'open';
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Refresh interval')
-			.setDesc('How long a successful feed response remains fresh.')
+			.setDesc('How long a response remains fresh when the interval policy is selected.')
 			.addDropdown((dropdown) => {
 				for (const minutes of REFRESH_INTERVALS) {
 					dropdown.addOption(String(minutes), minuteLabel(minutes));

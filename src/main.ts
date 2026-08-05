@@ -8,7 +8,8 @@ import {
 import { FeedCache, normalizeCache } from './cache';
 import { normalizeSettings } from './block-config';
 import { createGalleryBlock, planGalleryInsertionAtTop } from './note-insertion';
-import { GalleryView } from './renderer';
+import { createLivePreviewExtension, type LivePreviewGalleryHandle } from './live-preview';
+import { GalleryRuntime, GalleryView } from './renderer';
 import { fetchLetterboxdFeed } from './rss-client';
 import { LetterboxdRecentFilmsSettingTab } from './settings';
 import type { PluginData, PluginSettings } from './types';
@@ -20,25 +21,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 class GalleryRenderChild extends MarkdownRenderChild {
 	constructor(
 		containerEl: HTMLElement,
-		private readonly view: GalleryView,
-		private readonly remove: () => void,
+		private readonly handle: LivePreviewGalleryHandle,
 	) {
 		super(containerEl);
 	}
 
 	onload(): void {
-		void this.view.refresh();
+		void this.handle.view.refresh();
 	}
 
 	onunload(): void {
-		this.view.dispose();
-		this.remove();
+		this.handle.destroy();
 	}
 }
 
 export default class LetterboxdRecentFilmsPlugin extends Plugin {
 	settings: PluginSettings = normalizeSettings(null);
 	private cache!: FeedCache;
+	private readonly runtime = new GalleryRuntime();
 	private readonly galleries = new Set<GalleryView>();
 	private saveChain: Promise<void> = Promise.resolve();
 
@@ -53,6 +53,8 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 			'letterboxd-recent',
 			(source, element, context) => this.registerGallery(source, element, context),
 		);
+		this.registerEditorExtension(createLivePreviewExtension((element, source, notifyLayout) =>
+			this.createGalleryHandle(source, element, notifyLayout)));
 
 		this.addCommand({
 			id: 'insert-gallery-at-cursor',
@@ -94,12 +96,21 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: 'copy-collage-image',
+			name: 'Copy collage image',
+			callback: () => {
+				void this.copyCollageImage();
+			},
+		});
+
 		this.addSettingTab(new LetterboxdRecentFilmsSettingTab(this));
 	}
 
 	onunload(): void {
 		for (const gallery of this.galleries) gallery.dispose();
 		this.galleries.clear();
+		this.runtime.clear();
 	}
 
 	async saveSettings(): Promise<void> {
@@ -129,7 +140,26 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 
 	async clearCache(): Promise<void> {
 		await this.cache.clear();
+		this.runtime.clear();
 		new Notice('Letterboxd feed cache cleared.');
+	}
+
+	private async copyCollageImage(): Promise<void> {
+		const blob = this.runtime.collages.latestBlob();
+		if (!blob) {
+			new Notice('Open a poster collage first.');
+			return;
+		}
+		if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+			new Notice('Copying images is not supported on this device.');
+			return;
+		}
+		try {
+			await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+			new Notice('Poster collage copied as a PNG image.');
+		} catch {
+			new Notice('Obsidian could not copy the collage image.');
+		}
 	}
 
 	private registerGallery(
@@ -137,9 +167,30 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 		element: HTMLElement,
 		context: MarkdownPostProcessorContext,
 	): void {
-		const gallery = new GalleryView(element, source, () => this.settings, this.cache);
-		this.galleries.add(gallery);
-		context.addChild(new GalleryRenderChild(element, gallery, () => this.galleries.delete(gallery)));
+		context.addChild(new GalleryRenderChild(element, this.createGalleryHandle(source, element)));
+	}
+
+	private createGalleryHandle(
+		source: string,
+		element: HTMLElement,
+		notifyLayout: () => void = () => undefined,
+	): LivePreviewGalleryHandle {
+		const view = new GalleryView(
+			element,
+			source,
+			() => this.settings,
+			this.cache,
+			this.runtime,
+			notifyLayout,
+		);
+		this.galleries.add(view);
+		return {
+			view,
+			destroy: () => {
+				view.dispose();
+				this.galleries.delete(view);
+			},
+		};
 	}
 
 	private async refreshGalleries(force: boolean): Promise<void> {
