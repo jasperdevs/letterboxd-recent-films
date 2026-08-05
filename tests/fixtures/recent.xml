@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:letterboxd="https://letterboxd.com"
+  xmlns:tmdb="https://themoviedb.org">
+  <channel>
+    <title>Example member’s Letterboxd diary</title>
+    <item>
+      <title>Movie Alpha, 2024 - ★★★★½</title>
+      <link>https://letterboxd.com/example_user/film/movie-alpha/</link>
+      <guid>entry-alpha-new</guid>
+      <pubDate>Fri, 3 Jul 2026 20:00:00 +0000</pubDate>
+      <letterboxd:watchedDate>2026-07-03</letterboxd:watchedDate>
+      <letterboxd:filmTitle>Movie Alpha</letterboxd:filmTitle>
+      <letterboxd:filmYear>2024</letterboxd:filmYear>
+      <letterboxd:memberRating>4.5</letterboxd:memberRating>
+      <tmdb:movieId>100</tmdb:movieId>
+      <description><![CDATA[<p><img src="https://a.ltrbxd.com/resized/poster-alpha.jpg?v=one&amp;size=large"></p><script>not safe</script>]]></description>
+    </item>
+    <item>
+      <title>Movie Alpha, 2024 - ★★★★½</title>
+      <link>https://letterboxd.com/example_user/film/movie-alpha/</link>
+      <guid>entry-alpha-duplicate</guid>
+      <pubDate>Fri, 3 Jul 2026 20:00:00 +0000</pubDate>
+      <letterboxd:watchedDate>2026-07-03</letterboxd:watchedDate>
+      <letterboxd:filmTitle>Movie Alpha</letterboxd:filmTitle>
+      <letterboxd:filmYear>2024</letterboxd:filmYear>
+      <letterboxd:memberRating>4.5</letterboxd:memberRating>
+      <tmdb:movieId>100</tmdb:movieId>
+      <description><![CDATA[<img src="https://a.ltrbxd.com/resized/poster-alpha.jpg">]]></description>
+    </item>
+    <item>
+      <title>Movie Beta, 1999 - ★★★½</title>
+      <link>https://letterboxd.com/example_user/film/movie-beta/</link>
+      <guid>entry-beta</guid>
+      <pubDate>Thu, 2 Jul 2026 20:00:00 +0000</pubDate>
+      <letterboxd:watchedDate>2026-07-02</letterboxd:watchedDate>
+      <letterboxd:filmTitle>Movie Beta</letterboxd:filmTitle>
+      <letterboxd:filmYear>1999</letterboxd:filmYear>
+      <tmdb:movieId>200</tmdb:movieId>
+      <description><![CDATA[<img src="https://tracking.invalid/poster.jpg" onerror="alert('no')">]]></description>
+    </item>
+    <item>
+      <title>Movie Alpha, 2024 - ★★★★</title>
+      <link>https://letterboxd.com/example_user/film/movie-alpha/2/</link>
+      <guid>entry-alpha-rewatch</guid>
+      <pubDate>Mon, 1 Jun 2026 20:00:00 +0000</pubDate>
+      <letterboxd:watchedDate>2026-06-01</letterboxd:watchedDate>
+      <letterboxd:rewatch>Yes</letterboxd:rewatch>
+      <letterboxd:filmTitle>Movie Alpha</letterboxd:filmTitle>
+      <letterboxd:filmYear>2024</letterboxd:filmYear>
+      <letterboxd:memberRating>4.0</letterboxd:memberRating>
+      <tmdb:movieId>100</tmdb:movieId>
+      <description><![CDATA[<img src="https://a.ltrbxd.com/resized/poster-alpha.jpg">]]></description>
+    </item>
+    <item>
+      <title>A list that is not a diary entry</title>
+      <link>https://letterboxd.com/example_user/list/a-list/</link>
+      <guid>list-entry</guid>
+      <pubDate>Sat, 4 Jul 2026 20:00:00 +0000</pubDate>
+      <description><![CDATA[<p>This item must be filtered out.</p>]]></description>
+    </item>
+  </channel>
+</rss>

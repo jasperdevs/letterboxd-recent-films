@@ -1,0 +1,9 @@
+{
+	"id": "letterboxd-recent-films",
+	"name": "Letterboxd Recent Films",
+	"version": "1.0.0",
+	"minAppVersion": "1.5.0",
+	"description": "Show a Letterboxd user's latest diary entries as clickable movie posters in notes.",
+	"author": "Jasper",
+	"isDesktopOnly": false
+}

@@ -1,0 +1,195 @@
+.lrf-root {
+	--lrf-poster-width: 140px;
+	--lrf-radius: 6px;
+	--lrf-columns: 4;
+	color: var(--text-normal);
+	margin-block: var(--size-4-4);
+}
+
+.lrf-heading {
+	font-size: var(--h3-size);
+	font-weight: var(--h3-weight);
+	line-height: var(--h3-line-height);
+	margin: 0 0 var(--size-4-3);
+}
+
+.lrf-gallery {
+	display: grid;
+	gap: var(--size-4-3);
+	list-style: none;
+}
+
+.lrf-layout-strip .lrf-gallery {
+	grid-auto-columns: var(--lrf-poster-width);
+	grid-auto-flow: column;
+	grid-template-rows: auto;
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding: 2px 2px var(--size-4-2);
+	scrollbar-width: thin;
+}
+
+.lrf-layout-grid .lrf-gallery {
+	grid-template-columns: repeat(var(--lrf-columns), minmax(0, 1fr));
+}
+
+.lrf-layout-grid .lrf-film {
+	max-width: var(--lrf-poster-width);
+	width: 100%;
+}
+
+.lrf-film {
+	margin: 0;
+	min-width: 0;
+}
+
+.lrf-poster-link {
+	border-radius: var(--lrf-radius);
+	display: block;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+}
+
+.lrf-poster-link:hover .lrf-poster-image {
+	filter: brightness(1.06);
+}
+
+.lrf-poster-link:focus-visible {
+	outline-color: var(--interactive-accent);
+}
+
+.lrf-poster-frame,
+.lrf-skeleton {
+	aspect-ratio: 2 / 3;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--lrf-radius);
+	overflow: hidden;
+	position: relative;
+	width: 100%;
+}
+
+.lrf-poster-placeholder {
+	align-items: center;
+	color: var(--text-faint);
+	display: flex;
+	font-size: 2em;
+	font-weight: var(--font-semibold);
+	height: 100%;
+	justify-content: center;
+	user-select: none;
+	width: 100%;
+}
+
+.lrf-poster-image {
+	display: block;
+	height: 100%;
+	inset: 0;
+	object-fit: cover;
+	position: absolute;
+	transition: filter 120ms ease;
+	width: 100%;
+}
+
+.lrf-poster-image.is-unavailable {
+	display: none;
+}
+
+.lrf-caption {
+	line-height: var(--line-height-tight);
+	margin-top: var(--size-4-2);
+}
+
+.lrf-title {
+	color: var(--text-normal);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.lrf-meta {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	margin-top: 2px;
+}
+
+.lrf-state {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: var(--size-4-4);
+}
+
+.lrf-state-title {
+	font-weight: var(--font-semibold);
+}
+
+.lrf-state-detail,
+.lrf-cache-status,
+.lrf-loading-label {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.lrf-state-detail {
+	margin-top: var(--size-4-1);
+}
+
+.lrf-cache-status {
+	margin-bottom: var(--size-4-3);
+}
+
+.lrf-loading-label {
+	margin-bottom: var(--size-4-2);
+}
+
+.lrf-skeleton {
+	animation: lrf-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes lrf-pulse {
+	from { opacity: 0.45; }
+	to { opacity: 0.8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lrf-skeleton {
+		animation: none;
+	}
+
+	.lrf-poster-image {
+		transition: none;
+	}
+}
+
+@media (max-width: 600px) {
+	.lrf-layout-grid .lrf-gallery {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.lrf-poster-80 { --lrf-poster-width: 80px; }
+.lrf-poster-100 { --lrf-poster-width: 100px; }
+.lrf-poster-120 { --lrf-poster-width: 120px; }
+.lrf-poster-140 { --lrf-poster-width: 140px; }
+.lrf-poster-160 { --lrf-poster-width: 160px; }
+.lrf-poster-180 { --lrf-poster-width: 180px; }
+.lrf-poster-200 { --lrf-poster-width: 200px; }
+.lrf-poster-220 { --lrf-poster-width: 220px; }
+
+.lrf-radius-0 { --lrf-radius: 0; }
+.lrf-radius-4 { --lrf-radius: 4px; }
+.lrf-radius-6 { --lrf-radius: 6px; }
+.lrf-radius-8 { --lrf-radius: 8px; }
+.lrf-radius-12 { --lrf-radius: 12px; }
+.lrf-radius-16 { --lrf-radius: 16px; }
+
+.lrf-columns-2 { --lrf-columns: 2; }
+.lrf-columns-3 { --lrf-columns: 3; }
+.lrf-columns-4 { --lrf-columns: 4; }
+.lrf-columns-5 { --lrf-columns: 5; }
+.lrf-columns-6 { --lrf-columns: 6; }
+.lrf-columns-7 { --lrf-columns: 7; }
+.lrf-columns-8 { --lrf-columns: 8; }
