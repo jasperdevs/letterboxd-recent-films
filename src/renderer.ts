@@ -276,27 +276,21 @@ function renderCollage(
 	const links = wrapper.createDiv({ cls: 'lrf-collage-links' });
 	for (const [index, film] of films.entries()) {
 		const cell = getCollageCell(asset, index, films.length);
+		const information = selectedInformation(film, config, false);
+		const tooltipParts = [film.title, ...information.details];
 		const link = links.createEl('a', {
 			cls: 'lrf-collage-link',
 			href: film.letterboxdUrl,
 			attr: {
 				target: '_blank',
 				rel: 'noopener noreferrer',
-				'aria-label': `Open ${film.title}${film.year ? ` (${film.year})` : ''} on Letterboxd`,
+				'aria-label': `${tooltipParts.join(' · ')} — open on Letterboxd`,
 			},
 		});
 		link.style.setProperty('left', percentage(cell.x, asset.width));
 		link.style.setProperty('top', percentage(cell.y, asset.height));
 		link.style.setProperty('width', percentage(cell.width, asset.width));
 		link.style.setProperty('height', percentage(cell.height, asset.height));
-		const information = selectedInformation(film, config, false);
-		if (information.title || information.details.length > 0) {
-			const tooltip = link.createDiv({ cls: 'lrf-collage-tooltip' });
-			if (information.title) tooltip.createDiv({ cls: 'lrf-collage-tooltip-title', text: information.title });
-			if (information.details.length > 0) {
-				tooltip.createDiv({ cls: 'lrf-collage-tooltip-meta', text: information.details.join(' · ') });
-			}
-		}
 	}
 	if (config.layout === 'strip') enableStripScrolling(scroll);
 }
@@ -309,7 +303,6 @@ export class GalleryView {
 	private lastColumns = 0;
 	private lastCompositionWidth = 0;
 	private resizeTimer: number | null = null;
-	private posterSizeOverride: number | null = null;
 	private readonly resizeObserver: ResizeObserver | null;
 
 	constructor(
@@ -327,7 +320,7 @@ export class GalleryView {
 
 	async refresh(force = false): Promise<void> {
 		const currentRun = ++this.run;
-		const config = this.currentConfig();
+		const config = resolveGalleryConfig(this.source, this.getSettings());
 		if (!config.username) {
 			this.renderError(config, 'Add a Letterboxd username', 'Set a default username in plugin settings or add one to this block.');
 			return;
@@ -377,7 +370,6 @@ export class GalleryView {
 			if (config.renderMode === 'gallery' || films.length === 0) {
 				renderGallery(this.container, result, config, films);
 				this.addPaginationControls(config, result.films.length);
-				if (films.length > 0) this.addPosterSizeControl(config);
 			} else {
 				const compositionWidth = this.compositionWidth(config);
 				this.lastCompositionWidth = compositionWidth ?? 0;
@@ -405,11 +397,6 @@ export class GalleryView {
 		if (this.resizeTimer !== null) this.container.ownerDocument.defaultView?.clearTimeout(this.resizeTimer);
 	}
 
-	private currentConfig(): GalleryConfig {
-		const config = resolveGalleryConfig(this.source, this.getSettings());
-		return this.posterSizeOverride === null ? config : { ...config, posterSize: this.posterSizeOverride };
-	}
-
 	private effectiveColumns(config: GalleryConfig): number {
 		if (config.layout === 'strip') return config.count;
 		const width = this.availableWidth();
@@ -427,7 +414,7 @@ export class GalleryView {
 
 	private handleResize(): void {
 		if (this.disposed) return;
-		const config = this.currentConfig();
+		const config = resolveGalleryConfig(this.source, this.getSettings());
 		const columns = this.effectiveColumns(config);
 		const compositionWidth = this.compositionWidth(config) ?? 0;
 		if (columns === this.lastColumns && compositionWidth === this.lastCompositionWidth) return;
@@ -449,41 +436,6 @@ export class GalleryView {
 		const url = this.runtime.collages.objectUrl(key, this.container.ownerDocument);
 		renderCollage(this.container, result, config, films, asset, url);
 		this.addPaginationControls(config, result.films.length);
-		this.addPosterSizeControl(config);
-	}
-
-	private addPosterSizeControl(config: GalleryConfig): void {
-		const control = this.container.createEl('label', {
-			cls: 'lrf-size-control',
-			attr: { title: 'Resize posters proportionally' },
-		});
-		control.createSpan({ cls: 'lrf-size-label', text: 'Size' });
-		const slider = control.createEl('input', {
-			cls: 'lrf-size-slider',
-			attr: {
-				type: 'range',
-				min: '80',
-				max: '220',
-				step: '20',
-				value: String(config.posterSize),
-				'aria-label': 'Poster size',
-			},
-		});
-		slider.addEventListener('input', () => {
-			const value = Number.parseInt(slider.value, 10);
-			if (!Number.isFinite(value) || value === this.posterSizeOverride) return;
-			this.posterSizeOverride = value;
-			for (const className of Array.from(this.container.classList)) {
-				if (className.startsWith('lrf-poster-')) this.container.removeClass(className);
-			}
-			this.container.addClass(`lrf-poster-${value}`);
-			const gallery = this.container.querySelector<HTMLElement>('.lrf-gallery');
-			gallery?.style.setProperty(
-				'--lrf-gallery-max-width',
-				`${config.gridColumns * value + Math.max(0, config.gridColumns - 1) * config.gap}px`,
-			);
-		});
-		slider.addEventListener('change', () => void this.refresh(false));
 	}
 
 	private addPaginationControls(config: GalleryConfig, totalFilms: number): void {
@@ -524,7 +476,7 @@ export class GalleryView {
 	private async changePage(delta: number): Promise<void> {
 		const result = this.lastResult;
 		if (!result) return;
-		const config = this.currentConfig();
+		const config = resolveGalleryConfig(this.source, this.getSettings());
 		const lastPage = pageCount(result.films.length, config.count) - 1;
 		const nextPage = Math.max(0, Math.min(lastPage, this.page + delta));
 		if (nextPage === this.page) return;
@@ -534,7 +486,6 @@ export class GalleryView {
 		if (config.renderMode === 'gallery' || films.length === 0) {
 			renderGallery(this.container, result, config, films);
 			this.addPaginationControls(config, result.films.length);
-			if (films.length > 0) this.addPosterSizeControl(config);
 			this.notifyLayout();
 			return;
 		}

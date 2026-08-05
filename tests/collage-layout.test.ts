@@ -27,12 +27,12 @@ describe('poster collage layout', () => {
 		const layout = getCollageLayout(1, { ...DEFAULT_SETTINGS, count: 1 }, 1, 720);
 		expect(layout).toMatchObject({
 			featured: false,
-			width: 140,
-			posterWidth: 140,
-			posterHeight: 210,
-			height: 210,
+			width: 120,
+			posterWidth: 120,
+			posterHeight: 180,
+			height: 180,
 		});
-		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 140, height: 210 });
+		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 120, height: 180 });
 	});
 
 	it('centers incomplete final rows instead of leaving an orphan on the left', () => {

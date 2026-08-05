@@ -3,7 +3,6 @@ import { isValidUsername } from './block-config';
 import {
 	CORNER_RADII,
 	GAPS,
-	POSTER_SIZES,
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
 } from './types';
@@ -134,19 +133,18 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Poster size')
-			.setDesc('Preferred poster width. Grid posters can grow to fill space but never exceed 220 px.')
-			.addDropdown((dropdown) => {
-				for (const size of POSTER_SIZES) dropdown.addOption(String(size), `${size} px`);
-				dropdown.setValue(String(this.plugin.settings.posterSize));
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.posterSize = Number.parseInt(value, 10);
+			.setDesc('Poster width from compact to large. Height adjusts proportionally.')
+			.addSlider((slider) => slider
+				.setLimits(80, 220, 20)
+				.setValue(this.plugin.settings.posterSize)
+				.onChange(async (value) => {
+					this.plugin.settings.posterSize = value;
 					await this.plugin.saveSettings();
-				});
-			});
+				}));
 
 		new Setting(containerEl)
 			.setName('Corner radius')
-			.setDesc('Rounded poster corner size.')
+			.setDesc('Rounds card posters, or only the outside edge of a complete collage.')
 			.addDropdown((dropdown) => {
 				for (const radius of CORNER_RADII) dropdown.addOption(String(radius), `${radius} px`);
 				dropdown.setValue(String(this.plugin.settings.cornerRadius));

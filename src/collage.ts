@@ -155,24 +155,6 @@ function drawCaption(
 	}
 }
 
-function withRoundedPoster(
-	context: CanvasRenderingContext2D,
-	x: number,
-	y: number,
-	width: number,
-	height: number,
-	radius: number,
-	draw: () => void,
-): void {
-	const safeRadius = Math.max(0, Math.min(radius, width / 2, height / 2));
-	context.save();
-	context.beginPath();
-	context.roundRect(x, y, width, height, safeRadius);
-	context.clip();
-	draw();
-	context.restore();
-}
-
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 	return new Promise((resolve, reject) => {
 		canvas.toBlob((blob) => {
@@ -219,10 +201,8 @@ export async function createPosterCollage(
 			const cell = getCollageCell(layout, index, films.length);
 			const { x, y } = cell;
 			const poster = film.posterUrl ? posters.get(film.posterUrl) : null;
-			withRoundedPoster(context, x, y, layout.posterWidth, layout.posterHeight, config.cornerRadius, () => {
-				if (poster) context.drawImage(poster.image, x, y, layout.posterWidth, layout.posterHeight);
-				else drawPlaceholder(context, film, x, y, layout, background, mutedText);
-			});
+			if (poster) context.drawImage(poster.image, x, y, layout.posterWidth, layout.posterHeight);
+			else drawPlaceholder(context, film, x, y, layout, background, mutedText);
 			drawCaption(context, film, config, layout, x, y, background, primaryText, mutedText, fontFamily);
 		});
 
@@ -252,7 +232,6 @@ export function collageCacheKey(
 		showRating: config.showRating,
 		showDate: config.showDate,
 		posterSize: config.posterSize,
-		cornerRadius: config.cornerRadius,
 		gap: config.gap,
 		theme: styles ? [
 			themeValue(styles, '--background-secondary', '#262626'),

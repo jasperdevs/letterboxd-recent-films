@@ -1,5 +1,5 @@
 .lrf-root {
-	--lrf-poster-width: 140px;
+	--lrf-poster-width: 120px;
 	--lrf-radius: 6px;
 	--lrf-columns: 4;
 	--lrf-gap: 2px;
@@ -207,12 +207,14 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-collage-links {
+	border-radius: var(--lrf-radius);
 	inset: 0;
+	overflow: hidden;
 	position: absolute;
 }
 
 .lrf-collage-link {
-	border-radius: var(--lrf-radius);
+	border-radius: 0;
 	outline: 2px solid transparent;
 	outline-offset: -3px;
 	position: absolute;
@@ -229,98 +231,6 @@ body.theme-light .lrf-collage-image {
 
 .lrf-collage-link:active {
 	transform: scale(0.96);
-}
-
-.lrf-collage-tooltip {
-	backdrop-filter: blur(10px) saturate(1.15);
-	background: rgba(12, 12, 14, 0.72);
-	border-radius: max(4px, calc(var(--lrf-radius) - 4px));
-	bottom: 4px;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 4px 14px rgba(0, 0, 0, 0.16);
-	color: #fff;
-	left: 4px;
-	opacity: 0;
-	overflow: hidden;
-	padding: 7px 9px 8px;
-	pointer-events: none;
-	position: absolute;
-	right: 4px;
-	transform: translateY(6px);
-	transition: opacity 140ms ease-out, transform 140ms ease-out;
-}
-
-.lrf-collage-link:hover .lrf-collage-tooltip,
-.lrf-collage-link:focus-visible .lrf-collage-tooltip {
-	opacity: 1;
-	transform: translateY(0);
-}
-
-.lrf-collage-tooltip-title {
-	font-size: 12px;
-	font-weight: 600;
-	line-height: 1.3;
-	display: -webkit-box;
-	overflow: hidden;
-	text-wrap: pretty;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 2;
-}
-
-.lrf-collage-tooltip-meta {
-	color: rgba(255, 255, 255, 0.72);
-	font-size: 11px;
-	font-variant-numeric: tabular-nums;
-	line-height: 1.3;
-	margin-top: 3px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.lrf-size-control {
-	align-items: center;
-	backdrop-filter: blur(10px);
-	background: rgba(18, 18, 20, 0.72);
-	border-radius: 999px;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 14px rgba(0, 0, 0, 0.14);
-	color: rgba(255, 255, 255, 0.82);
-	display: flex;
-	gap: 8px;
-	height: 40px;
-	opacity: 0;
-	padding: 0 12px;
-	pointer-events: none;
-	position: absolute;
-	right: 8px;
-	top: 8px;
-	transform: translateY(-4px);
-	transition: opacity 140ms ease-out, transform 140ms ease-out;
-	z-index: 5;
-}
-
-.lrf-root:hover .lrf-size-control,
-.lrf-root:focus-within .lrf-size-control {
-	opacity: 1;
-	pointer-events: auto;
-	transform: translateY(0);
-}
-
-.lrf-size-label {
-	font-size: 11px;
-	font-weight: 600;
-	letter-spacing: 0.02em;
-}
-
-.lrf-size-slider {
-	accent-color: var(--interactive-accent);
-	cursor: ew-resize;
-	margin: 0;
-	width: 92px;
-}
-
-.lrf-size-slider:focus-visible {
-	outline: 2px solid var(--interactive-accent);
-	outline-offset: 3px;
 }
 
 .lrf-page-navigation {
@@ -465,9 +375,7 @@ body.theme-light .lrf-collage-image {
 		transition: none;
 	}
 
-	.lrf-collage-tooltip,
-	.lrf-page-navigation,
-	.lrf-size-control {
+	.lrf-page-navigation {
 		transition: none;
 	}
 }
@@ -490,12 +398,6 @@ body.theme-light .lrf-collage-image {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-}
-
-@media (max-width: 480px) {
-	.lrf-size-control {
-		display: none;
-	}
 }
 
 @media (hover: none) {

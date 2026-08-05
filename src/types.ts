@@ -68,7 +68,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	showYear: false,
 	showRating: false,
 	showDate: false,
-	posterSize: 140,
+	posterSize: 120,
 	cornerRadius: 6,
 	refreshIntervalMinutes: 60,
 	refreshPolicy: 'open',
