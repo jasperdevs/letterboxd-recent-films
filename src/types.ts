@@ -1,6 +1,4 @@
 export type GalleryLayout = 'strip' | 'grid';
-export type RenderMode = 'collage' | 'gallery';
-export type InformationStyle = 'none' | 'hover' | 'captions' | 'cards';
 export type RefreshPolicy = 'open' | 'interval' | 'manual';
 
 export interface FilmEntry {
@@ -19,8 +17,6 @@ export interface PluginSettings {
 	username: string;
 	count: number;
 	layout: GalleryLayout;
-	renderMode: RenderMode;
-	informationStyle: InformationStyle;
 	gap: number;
 	heading: string;
 	showHeading: boolean;
@@ -28,7 +24,7 @@ export interface PluginSettings {
 	showYear: boolean;
 	showRating: boolean;
 	showDate: boolean;
-	posterSize: number;
+	galleryWidth: number;
 	cornerRadius: number;
 	refreshIntervalMinutes: number;
 	refreshPolicy: RefreshPolicy;
@@ -47,7 +43,7 @@ export interface PluginData {
 	cache: Record<string, CacheEntry>;
 }
 
-export const POSTER_SIZES = [80, 100, 120, 140, 160, 180, 200, 220] as const;
+export const GALLERY_WIDTHS = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100] as const;
 export const CORNER_RADII = [0, 4, 6, 8, 12, 16] as const;
 export const GAPS = [0, 2, 4, 8] as const;
 export const REFRESH_INTERVALS = [5, 15, 30, 60, 180, 360, 720, 1440] as const;
@@ -57,8 +53,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	username: '',
 	count: 6,
 	layout: 'grid',
-	renderMode: 'collage',
-	informationStyle: 'none',
 	gap: 4,
 	heading: 'Recently watched',
 	showHeading: false,
@@ -66,7 +60,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	showYear: false,
 	showRating: false,
 	showDate: false,
-	posterSize: 120,
+	galleryWidth: 75,
 	cornerRadius: 6,
 	refreshIntervalMinutes: 60,
 	refreshPolicy: 'open',

@@ -1,15 +1,14 @@
 import {
 	CORNER_RADII,
 	DEFAULT_SETTINGS,
+	GALLERY_WIDTHS,
 	GAPS,
-	POSTER_SIZES,
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
 	type GalleryConfig,
 	type GalleryLayout,
 	type PluginSettings,
 	type RefreshPolicy,
-	type RenderMode,
 } from './types';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9_]{2,15}$/;
@@ -46,23 +45,16 @@ function layoutValue(value: unknown, fallback: GalleryLayout): GalleryLayout {
 	return value === 'strip' || value === 'grid' ? value : fallback;
 }
 
-function renderModeValue(value: unknown, fallback: RenderMode): RenderMode {
-	return value === 'collage' || value === 'gallery' ? value : fallback;
-}
-
 function refreshPolicyValue(value: unknown, fallback: RefreshPolicy): RefreshPolicy {
 	return value === 'open' || value === 'interval' || value === 'manual' ? value : fallback;
 }
 
 export function normalizeSettings(value: unknown): PluginSettings {
 	const input = isRecord(value) ? value : {};
-	const renderMode = renderModeValue(input.renderMode, DEFAULT_SETTINGS.renderMode);
 	return {
 		username: stringValue(input.username, DEFAULT_SETTINGS.username, 15).trim(),
 		count: finiteInteger(input.count, DEFAULT_SETTINGS.count, 1, 20),
 		layout: layoutValue(input.layout, DEFAULT_SETTINGS.layout),
-		renderMode,
-		informationStyle: renderMode === 'gallery' ? 'cards' : 'none',
 		gap: allowedNumber(input.gap, DEFAULT_SETTINGS.gap, GAPS),
 		heading: stringValue(input.heading, DEFAULT_SETTINGS.heading, 120),
 		showHeading: booleanValue(input.showHeading, DEFAULT_SETTINGS.showHeading),
@@ -70,7 +62,7 @@ export function normalizeSettings(value: unknown): PluginSettings {
 		showYear: booleanValue(input.showYear, DEFAULT_SETTINGS.showYear),
 		showRating: booleanValue(input.showRating, DEFAULT_SETTINGS.showRating),
 		showDate: booleanValue(input.showDate, DEFAULT_SETTINGS.showDate),
-		posterSize: allowedNumber(input.posterSize, DEFAULT_SETTINGS.posterSize, POSTER_SIZES),
+		galleryWidth: allowedNumber(input.galleryWidth, DEFAULT_SETTINGS.galleryWidth, GALLERY_WIDTHS),
 		cornerRadius: allowedNumber(input.cornerRadius, DEFAULT_SETTINGS.cornerRadius, CORNER_RADII),
 		refreshIntervalMinutes: allowedNumber(
 			input.refreshIntervalMinutes,
@@ -124,18 +116,6 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			case 'layout':
 				if (value === 'strip' || value === 'grid') overrides.layout = value;
 				break;
-			case 'render-mode':
-				if (value === 'collage' || value === 'gallery') {
-					overrides.renderMode = value;
-					if (value === 'gallery') overrides.informationStyle = 'cards';
-				}
-				break;
-			case 'information-style':
-				if (value === 'none' || value === 'hover' || value === 'captions' || value === 'cards') {
-					overrides.informationStyle = value;
-					overrides.renderMode = value === 'cards' ? 'gallery' : 'collage';
-				}
-				break;
 			case 'gap': {
 				const parsed = parseAllowedInteger(value, GAPS);
 				if (parsed !== undefined) overrides.gap = parsed;
@@ -144,11 +124,9 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			case 'heading':
 				overrides.heading = value.slice(0, 120);
 				break;
-			case 'poster-size': {
-				const parsed = parseInteger(value, 80, 220);
-				if (parsed !== undefined && POSTER_SIZES.includes(parsed as (typeof POSTER_SIZES)[number])) {
-					overrides.posterSize = parsed;
-				}
+			case 'gallery-width': {
+				const parsed = parseAllowedInteger(value, GALLERY_WIDTHS);
+				if (parsed !== undefined) overrides.galleryWidth = parsed;
 				break;
 			}
 			case 'corner-radius': {

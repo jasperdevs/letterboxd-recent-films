@@ -6,7 +6,7 @@ import {
 	type CollageAsset,
 } from './collage';
 import { CollageCache } from './collage-cache';
-import { balancedGridColumns, getCollageCell, responsiveGridColumns } from './collage-layout';
+import { balancedGridColumns, getCollageCell } from './collage-layout';
 import { FeedError, fetchLetterboxdFeed } from './rss-client';
 import type { FilmEntry, GalleryConfig, PluginSettings } from './types';
 
@@ -81,31 +81,17 @@ function applyRootClasses(container: HTMLElement, config: GalleryConfig): void {
 		if (className === 'lrf-root' || className === 'lrf-render-collage' ||
 			className.startsWith('lrf-layout-') || className.startsWith('lrf-poster-') ||
 			className.startsWith('lrf-radius-') ||
-			className.startsWith('lrf-gap-') || className.startsWith('lrf-count-') ||
-			className === 'lrf-render-gallery') {
+			className.startsWith('lrf-gap-') || className.startsWith('lrf-count-')) {
 			container.removeClass(className);
 		}
 	}
 	container.addClass(
 		'lrf-root',
 		`lrf-layout-${config.layout}`,
-		`lrf-poster-${config.posterSize}`,
 		`lrf-radius-${config.cornerRadius}`,
 		`lrf-gap-${config.gap}`,
 		`lrf-count-${config.count}`,
 	);
-}
-
-function posterOnlyConfig(config: GalleryConfig): GalleryConfig {
-	return {
-		...config,
-		renderMode: 'collage',
-		informationStyle: 'none',
-		showCaptions: false,
-		showYear: false,
-		showRating: false,
-		showDate: false,
-	};
 }
 
 function renderLoading(container: HTMLElement, config: GalleryConfig): void {
@@ -118,59 +104,14 @@ function renderLoading(container: HTMLElement, config: GalleryConfig): void {
 	for (let index = 0; index < Math.min(config.count, 6); index += 1) gallery.createDiv({ cls: 'lrf-skeleton' });
 }
 
-function selectedInformation(
-	film: FilmEntry,
-	config: GalleryConfig,
-	fallbackToTitle: boolean,
-): { title: string; details: string[] } {
+function selectedInformation(film: FilmEntry, config: GalleryConfig): { title: string; details: string[] } {
 	const anySelected = config.showCaptions || config.showYear || config.showRating || config.showDate;
-	const title = config.showCaptions || (fallbackToTitle && !anySelected) ? film.title : '';
+	const title = config.showCaptions || !anySelected ? film.title : '';
 	const details: string[] = [];
 	if (config.showYear && film.year) details.push(String(film.year));
 	if (config.showRating && film.rating) details.push(formatRating(film.rating));
 	if (config.showDate) details.push(formatDate(film.watchedDate));
 	return { title, details };
-}
-
-function renderFilm(gallery: HTMLElement, film: FilmEntry, config: GalleryConfig): void {
-	const figure = gallery.createEl('figure', {
-		cls: 'lrf-film',
-	});
-	const year = film.year ? ` (${film.year})` : '';
-	const link = figure.createEl('a', {
-		cls: 'lrf-poster-link',
-		href: film.letterboxdUrl,
-		attr: {
-			target: '_blank',
-			rel: 'noopener noreferrer',
-			'aria-label': `Open ${film.title}${year} on Letterboxd`,
-		},
-	});
-	figure.appendChild(link);
-	const frame = link.createDiv({ cls: 'lrf-poster-frame' });
-	frame.createDiv({ cls: 'lrf-poster-placeholder', text: film.title.slice(0, 1).toUpperCase() || 'Film' });
-	if (film.posterUrl) {
-		const image = frame.createEl('img', {
-			cls: 'lrf-poster-image',
-			attr: {
-				src: film.posterUrl,
-				alt: `${film.title}${year} poster`,
-				loading: 'lazy',
-				decoding: 'async',
-				referrerpolicy: 'no-referrer',
-			},
-		});
-		image.addEventListener('error', () => image.addClass('is-unavailable'), { once: true });
-	}
-	const information = selectedInformation(film, config, true);
-	if (information.title || information.details.length > 0) {
-		const caption = figure.createEl('figcaption', { cls: 'lrf-caption' });
-		if (information.title) caption.createDiv({ cls: 'lrf-title', text: information.title });
-		if (information.details.length > 0) {
-			const metadata = caption.createDiv({ cls: 'lrf-meta' });
-			for (const detail of information.details) metadata.createSpan({ cls: 'lrf-meta-item', text: detail });
-		}
-	}
 }
 
 function addCacheStatus(container: HTMLElement, result: CacheResult): void {
@@ -183,37 +124,12 @@ function addCacheStatus(container: HTMLElement, result: CacheResult): void {
 	status.setAttr('role', 'status');
 }
 
-function renderGallery(
-	container: HTMLElement,
-	result: CacheResult,
-	config: GalleryConfig,
-	films: FilmEntry[],
-	columns: number,
-): void {
+function renderEmpty(container: HTMLElement, result: CacheResult, config: GalleryConfig): void {
 	container.empty();
 	applyRootClasses(container, config);
-	container.addClass('lrf-render-gallery');
 	addHeading(container, config);
 	addCacheStatus(container, result);
-	if (films.length === 0) {
-		renderState(container, 'No diary entries yet', 'This public RSS feed does not contain any recent diary entries.');
-		return;
-	}
-	const gallery = container.createDiv({ cls: 'lrf-gallery' });
-	if (config.layout === 'grid') {
-		gallery.style.setProperty('--lrf-grid-columns', String(columns));
-		gallery.style.setProperty(
-			'--lrf-gallery-width',
-			`${columns * config.posterSize + Math.max(0, columns - 1) * config.gap}px`,
-		);
-	} else {
-		gallery.style.setProperty('--lrf-strip-count', String(films.length));
-		gallery.style.setProperty(
-			'--lrf-gallery-width',
-			`${films.length * config.posterSize + Math.max(0, films.length - 1) * config.gap}px`,
-		);
-	}
-	for (const film of films) renderFilm(gallery, film, config);
+	renderState(container, 'No diary entries yet', 'This public RSS feed does not contain any recent diary entries.');
 }
 
 function percentage(value: number, total: number): string {
@@ -235,7 +151,7 @@ function renderCollage(
 	addCacheStatus(container, result);
 	const scroll = container.createDiv({ cls: 'lrf-collage-scroll' });
 	const wrapper = scroll.createDiv({ cls: 'lrf-collage-wrap' });
-	wrapper.style.setProperty('width', `${asset.width}px`);
+	wrapper.style.setProperty('width', `${config.galleryWidth}%`);
 	wrapper.createEl('img', {
 		cls: 'lrf-collage-image',
 		attr: {
@@ -250,7 +166,7 @@ function renderCollage(
 	const links = wrapper.createDiv({ cls: 'lrf-collage-links' });
 	for (const [index, film] of films.entries()) {
 		const cell = getCollageCell(asset, index, films.length);
-		const information = selectedInformation(film, config, false);
+		const information = selectedInformation(film, config);
 		const tooltipParts = [film.title, ...information.details];
 		const link = links.createEl('a', {
 			cls: 'lrf-collage-link',
@@ -271,10 +187,6 @@ function renderCollage(
 export class GalleryView {
 	private run = 0;
 	private disposed = false;
-	private lastResult: CacheResult | null = null;
-	private lastColumns = 0;
-	private resizeTimer: number | null = null;
-	private readonly resizeObserver: ResizeObserver | null;
 
 	constructor(
 		private readonly container: HTMLElement,
@@ -283,11 +195,7 @@ export class GalleryView {
 		private readonly cache: FeedCache,
 		private readonly runtime: GalleryRuntime,
 		private readonly notifyLayout: () => void = () => undefined,
-	) {
-		const ResizeObserverConstructor = container.ownerDocument.defaultView?.ResizeObserver;
-		this.resizeObserver = ResizeObserverConstructor ? new ResizeObserverConstructor(() => this.handleResize()) : null;
-		this.resizeObserver?.observe(container);
-	}
+	) {}
 
 	async refresh(force = false): Promise<void> {
 		const currentRun = ++this.run;
@@ -304,14 +212,11 @@ export class GalleryView {
 
 		const saved = this.cache.peek(config.username);
 		let hasStableImage = false;
-		if (saved && config.renderMode === 'collage' && saved.films.length > 0) {
+		if (saved && saved.films.length > 0) {
 			const savedResult: CacheResult = { ...saved, source: 'cache' };
-			this.lastResult = savedResult;
 			const films = saved.films.slice(0, config.count);
 			const columns = this.effectiveColumns(config, films.length);
-			this.lastColumns = columns;
-			const collageConfig = posterOnlyConfig(config);
-			const key = collageCacheKey(films, collageConfig, columns, this.container.ownerDocument);
+			const key = collageCacheKey(films, config, columns, this.container.ownerDocument);
 			const asset = this.runtime.collages.peek(key);
 			if (asset) {
 				this.showCollage(savedResult, config, films, key, asset);
@@ -332,18 +237,15 @@ export class GalleryView {
 				force || firstView,
 			);
 			if (this.disposed || currentRun !== this.run) return;
-			this.lastResult = result;
 			const films = result.films.slice(0, config.count);
 			const columns = this.effectiveColumns(config, films.length);
-			this.lastColumns = columns;
-			if (config.renderMode === 'gallery' || films.length === 0) {
-				renderGallery(this.container, result, config, films, columns);
+			if (films.length === 0) {
+				renderEmpty(this.container, result, config);
 			} else {
-				const collageConfig = posterOnlyConfig(config);
-				const key = collageCacheKey(films, collageConfig, columns, this.container.ownerDocument);
+				const key = collageCacheKey(films, config, columns, this.container.ownerDocument);
 				const asset = await this.runtime.collages.get(
 					key,
-					() => createPosterCollage(films, collageConfig, this.container.ownerDocument, columns),
+					() => createPosterCollage(films, config, this.container.ownerDocument, columns),
 				);
 				if (this.disposed || currentRun !== this.run) return;
 				this.showCollage(result, config, films, key, asset);
@@ -359,33 +261,11 @@ export class GalleryView {
 	dispose(): void {
 		this.disposed = true;
 		this.run += 1;
-		this.resizeObserver?.disconnect();
-		if (this.resizeTimer !== null) this.container.ownerDocument.defaultView?.clearTimeout(this.resizeTimer);
 	}
 
 	private effectiveColumns(config: GalleryConfig, filmCount: number): number {
 		if (config.layout === 'strip') return Math.max(1, filmCount);
-		const containerWidth = this.container.clientWidth || this.container.getBoundingClientRect().width;
-		const parentWidth = this.container.parentElement?.clientWidth ?? 0;
-		const viewportWidth = this.container.ownerDocument.documentElement.clientWidth;
-		const availableWidth = containerWidth || parentWidth || Math.min(600, Math.max(280, viewportWidth - 48));
-		const maximum = responsiveGridColumns(availableWidth, 6, config.posterSize, config.gap);
-		return balancedGridColumns(filmCount, maximum);
-	}
-
-	private handleResize(): void {
-		if (this.disposed || !this.lastResult) return;
-		const config = resolveGalleryConfig(this.source, this.getSettings());
-		if (config.layout !== 'grid') return;
-		const films = this.lastResult.films.slice(0, config.count);
-		const columns = this.effectiveColumns(config, films.length);
-		if (columns === this.lastColumns) return;
-		const window = this.container.ownerDocument.defaultView;
-		if (this.resizeTimer !== null) window?.clearTimeout(this.resizeTimer);
-		this.resizeTimer = window?.setTimeout(() => {
-			this.resizeTimer = null;
-			void this.refresh(false);
-		}, 120) ?? null;
+		return balancedGridColumns(filmCount, Math.min(6, Math.max(1, filmCount)));
 	}
 
 	private showCollage(

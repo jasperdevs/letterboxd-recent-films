@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Balance responsive grids evenly and use a comfortable default gap.
 - Keep grid collages inside the note when Obsidian has not reported its final width yet.
 - Clarify that posters come directly from Letterboxd RSS and remove custom-poster language.
+- Remove detailed-poster mode and its display selector in favor of one poster collage with optional heading and tooltip details.
+- Replace ineffective per-poster sizing with a left-aligned gallery-width control and clip the outer collage radius reliably.
 
 ## 1.0.1 - 2026-08-05
 

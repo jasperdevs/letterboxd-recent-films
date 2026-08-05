@@ -7,19 +7,18 @@ describe('poster collage layout', () => {
 		const layout = getCollageLayout(6, {
 			...DEFAULT_SETTINGS,
 			layout: 'strip',
-			posterSize: 140,
 		});
 		expect(layout).toEqual({
 			featured: false,
 			columns: 6,
 			rows: 1,
-			posterWidth: 140,
-			posterHeight: 210,
+			posterWidth: 300,
+			posterHeight: 450,
 			captionHeight: 0,
-			cellHeight: 210,
-			width: 850,
-			height: 210,
-			gap: 2,
+			cellHeight: 450,
+			width: 1820,
+			height: 450,
+			gap: 4,
 		});
 	});
 
@@ -27,46 +26,42 @@ describe('poster collage layout', () => {
 		const layout = getCollageLayout(1, { ...DEFAULT_SETTINGS, count: 1 }, 1, 720);
 		expect(layout).toMatchObject({
 			featured: false,
-			width: 120,
-			posterWidth: 120,
-			posterHeight: 180,
-			height: 180,
+			width: 300,
+			posterWidth: 300,
+			posterHeight: 450,
+			height: 450,
 		});
-		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 120, height: 180 });
+		expect(getCollageCell(layout, 0, 1)).toEqual({ x: 0, y: 0, width: 300, height: 450 });
 	});
 
 	it('centers incomplete final rows instead of leaving an orphan on the left', () => {
 		const layout = getCollageLayout(5, { ...DEFAULT_SETTINGS, gap: 4 }, 3);
-		expect(getCollageCell(layout, 3, 5).x).toBe(62);
-		expect(getCollageCell(layout, 4, 5).x).toBe(186);
+		expect(getCollageCell(layout, 3, 5).x).toBe(152);
+		expect(getCollageCell(layout, 4, 5).x).toBe(456);
 	});
 
-	it('keeps grid posters at the selected size instead of stretching them', () => {
+	it('uses a stable source resolution before responsive display scaling', () => {
 		const layout = getCollageLayout(4, { ...DEFAULT_SETTINGS, gap: 4 }, 4, 700);
-		expect(layout.posterWidth).toBe(120);
-		expect(layout.width).toBe(492);
+		expect(layout.posterWidth).toBe(300);
+		expect(layout.width).toBe(1212);
 		const pair = getCollageLayout(2, { ...DEFAULT_SETTINGS, gap: 4 }, 2, 700);
-		expect(pair.posterWidth).toBe(120);
-		expect(pair.width).toBe(244);
+		expect(pair.posterWidth).toBe(300);
+		expect(pair.width).toBe(604);
 	});
 
-	it('wraps a grid into rows and reserves image space for optional information', () => {
+	it('wraps a poster-only grid without embedded captions', () => {
 		const layout = getCollageLayout(6, {
 			...DEFAULT_SETTINGS,
 			layout: 'grid',
-			posterSize: 140,
-			informationStyle: 'captions',
-			showCaptions: true,
-			showRating: true,
 		}, 3);
 		expect(layout).toMatchObject({
 			columns: 3,
 			rows: 2,
-			captionHeight: 88,
-			cellHeight: 298,
-			width: 424,
-			height: 598,
-			gap: 2,
+			captionHeight: 0,
+			cellHeight: 450,
+			width: 908,
+			height: 904,
+			gap: 4,
 		});
 	});
 

@@ -1,6 +1,6 @@
 # Letterboxd Recent Films
 
-Show a Letterboxd user's latest public diary entries as a clickable poster collage inside any Obsidian note. By default, the plugin composes the selected posters into one PNG image in memory. It can alternatively use separate poster cards, add optional film information, inherit your Obsidian theme, and keep the last successful feed result available offline.
+Show a Letterboxd user's latest public diary entries as one clickable poster collage inside any Obsidian note. The plugin composes the selected posters into a PNG image in memory, supports optional heading and tooltip details, inherits your Obsidian theme, and keeps the last successful feed result available offline.
 
 This is an unofficial community plugin. It is not affiliated with, endorsed by, or connected to Letterboxd or Obsidian.
 
@@ -22,8 +22,8 @@ Or override settings for one gallery:
 username: movie_fan
 count: 6
 layout: grid
-information-style: none
 gap: 4
+gallery-width: 75
 heading: Recently watched
 show-captions: false
 show-rating: false
@@ -36,9 +36,9 @@ The block renders in both Live Preview and Reading view. Switch to Source mode t
 
 The `count` option is final: the gallery shows exactly that many newest entries and does not add pagination or hidden older pages.
 
-Both display styles support a **Grid** and a **Single fitted row**. Grid is recommended: it measures the note, fills strictly in RSS order, and balances rows without hiding entries. Single fitted row keeps every selected movie on one line and scales the complete row to the note width. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
+The collage supports a **Grid** and a **Single fitted row**. Grid balances rows without hiding entries. Single fitted row keeps every selected movie on one line. Both remain left-aligned and scale to the selected gallery width.
 
-Use the **Poster size** slider in plugin settings to set a maximum width. Posters shrink when necessary so they never leave the note. The recommended default is `120 px`.
+Use the **Gallery size** slider to set the complete collage width from 40% to 100% of the note. The default is 75%.
 
 ## Block options
 
@@ -49,15 +49,14 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | `username` | A valid public Letterboxd username |
 | `count` | `1`–`20` |
 | `layout` | `strip` or `grid` |
-| `render-mode` | `collage` for poster-only output or `gallery` for detailed cards |
 | `gap` | `0`, `2`, `4`, or `8` pixels |
+| `gallery-width` | `40`–`100` in increments of `5` |
 | `heading` | Plain text, up to 120 characters |
 | `show-heading` | `true` or `false` |
 | `show-captions` | `true` or `false` |
 | `show-year` | `true` or `false` |
 | `show-rating` | `true` or `false` |
 | `show-date` | `true` or `false` |
-| `poster-size` | `80`, `100`, `120`, `140`, `160`, `180`, `200`, or `220` |
 | `corner-radius` | `0`, `4`, `6`, `8`, `12`, or `16` |
 | `refresh-interval` | `5`, `15`, `30`, `60`, `180`, `360`, `720`, or `1440` minutes |
 | `refresh-policy` | `open`, `interval`, or `manual` |
@@ -65,11 +64,11 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 ## Settings
 
-Global settings cover the username, newest movies shown, poster-collage or detailed-card display, fitted-row/Grid layout, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
+Global settings cover the username, newest movies shown, fitted-row/Grid layout, gallery width, poster gap, optional heading, tooltip fields, outer corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
 
-The settings screen shows only the essentials by default: username, movies shown, display style, layout, and poster size. **Show advanced** reveals heading, spacing, radius, film information, refresh behavior, and cache tools without removing any features.
+The settings screen shows username, movies shown, layout, gallery size, and the heading toggle first. **Show advanced** reveals spacing, the collage's outer radius, tooltip information, refresh behavior, and cache tools.
 
-**Poster collage** creates one image containing square-cornered inner posters, with the selected corner radius applied only to the outside of the complete collage. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
+The plugin has one presentation style: a poster collage with square inner poster edges. The corner-radius setting clips only the outside of the complete image. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus.
 
 Poster URLs are taken directly from each Letterboxd RSS entry. The plugin has no custom-poster system and does not replace or download posters into the vault. The feed does not provide a separate official backdrop, and the plugin does not request one from TMDB.
 
@@ -89,7 +88,7 @@ The plugin requests `https://letterboxd.com/{username}/rss/` with Obsidian's sup
 
 The recommended **When a gallery is viewed** refresh policy checks the feed when you open/view a gallery and suppresses duplicate requests caused by quick Live Preview remounts. **After the cache interval** uses the selected freshness interval. **Manual only** uses the last saved result until you run **Refresh galleries**; it still makes an initial request when no saved result exists. None of these policies polls Letterboxd in the background.
 
-In fitted-row layout, every selected poster remains visible on one line. The chosen poster size acts as a maximum and the row scales down when necessary.
+In fitted-row layout, every selected poster remains visible on one line. The gallery-size percentage controls the complete row directly.
 
 The gallery includes dedicated loading, empty, offline, missing-user, timeout, malformed-feed, and invalid-username states. Missing or failed posters use placeholders. Images are lazy-loaded and are never downloaded into the vault.
 

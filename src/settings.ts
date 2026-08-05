@@ -83,36 +83,43 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					this.renderSettings();
 				}));
 
+		new Setting(containerEl).setName('Appearance').setHeading();
+
 		new Setting(containerEl)
-			.setName('Display style')
-			.setDesc('Poster collage is the clean default. Detailed posters add text underneath.')
-			.addDropdown((dropdown) => dropdown
-				.addOption('collage', 'Poster collage (recommended)')
-				.addOption('gallery', 'Detailed posters')
-				.setValue(this.plugin.settings.renderMode)
+			.setName('Gallery size')
+			.setDesc('Width of the complete collage as a percentage of the note.')
+			.addSlider((slider) => slider
+				.setLimits(40, 100, 5)
+				.setValue(this.plugin.settings.galleryWidth)
 				.onChange(async (value) => {
-					this.plugin.settings.renderMode = value === 'gallery' ? 'gallery' : 'collage';
-					this.plugin.settings.informationStyle = value === 'gallery' ? 'cards' : 'none';
+					this.plugin.settings.galleryWidth = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Show heading')
+			.setDesc('Display a heading above the collage.')
+			.addToggle((toggle) => toggle
+				.setValue(this.plugin.settings.showHeading)
+				.onChange(async (value) => {
+					this.plugin.settings.showHeading = value;
 					await this.plugin.saveSettings();
 					this.renderSettings();
 				}));
 
-		new Setting(containerEl).setName('Appearance').setHeading();
-
-		new Setting(containerEl)
-			.setName('Poster size')
-			.setDesc('Maximum poster width. Posters shrink automatically when the note needs more room.')
-			.addSlider((slider) => slider
-				.setLimits(80, 220, 20)
-				.setValue(this.plugin.settings.posterSize)
+		if (this.plugin.settings.showHeading) new Setting(containerEl)
+			.setName('Heading text')
+			.setDesc('Text displayed above the collage.')
+			.addText((text) => text
+				.setValue(this.plugin.settings.heading)
 				.onChange(async (value) => {
-					this.plugin.settings.posterSize = value;
+					this.plugin.settings.heading = value.slice(0, 120);
 					await this.plugin.saveSettings();
 				}));
 
 		new Setting(containerEl)
 			.setName('Advanced settings')
-			.setDesc('Heading, spacing, corner radius, film information, refresh behavior, and cache tools.')
+			.setDesc('Spacing, corner radius, tooltip details, refresh behavior, and cache tools.')
 			.addButton((button) => button
 				.setButtonText(this.showAdvanced ? 'Hide advanced' : 'Show advanced')
 				.onClick(() => {
@@ -124,7 +131,7 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Corner radius')
-			.setDesc('Rounds card posters, or only the outside edge of a complete collage.')
+			.setDesc('Round only the outside edge of the complete collage.')
 			.addDropdown((dropdown) => {
 				for (const radius of CORNER_RADII) dropdown.addOption(String(radius), `${radius} px`);
 				dropdown.setValue(String(this.plugin.settings.cornerRadius));
@@ -147,30 +154,8 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName('Show heading')
-			.setDesc('Display a heading above each gallery.')
-			.addToggle((toggle) => toggle
-				.setValue(this.plugin.settings.showHeading)
-				.onChange(async (value) => {
-					this.plugin.settings.showHeading = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Heading text')
-			.setDesc('Heading used when the heading toggle is enabled.')
-			.addText((text) => text
-				.setValue(this.plugin.settings.heading)
-				.onChange(async (value) => {
-					this.plugin.settings.heading = value.slice(0, 120);
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
 			.setName('Film information')
-			.setDesc(this.plugin.settings.renderMode === 'gallery'
-				? 'Choose the information shown under detailed cards.'
-				: 'Choose the information revealed when a poster is hovered or focused.')
+			.setDesc('Choose the information included when a poster is hovered or keyboard-focused.')
 			.setHeading();
 		this.addToggle('Show titles', 'Show film titles.', 'showCaptions');
 		this.addToggle('Show year', 'Show each film’s release year.', 'showYear');

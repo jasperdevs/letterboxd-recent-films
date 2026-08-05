@@ -27,15 +27,13 @@ describe('block parsing', () => {
 			'username: movie_fan',
 			'count: 12',
 			'layout: grid',
-			'render-mode: gallery',
-			'information-style: hover',
 			'gap: 4',
 			'heading: Diary: this week',
 			'show-captions: true',
 			'show-year: true',
 			'show-rating: true',
 			'show-date: false',
-			'poster-size: 180',
+			'gallery-width: 80',
 			'corner-radius: 12',
 			'refresh-interval: 30',
 			'refresh-policy: manual',
@@ -44,15 +42,13 @@ describe('block parsing', () => {
 			username: 'movie_fan',
 			count: 12,
 			layout: 'grid',
-			renderMode: 'gallery',
-			informationStyle: 'hover',
 			gap: 4,
 			heading: 'Diary: this week',
 			showCaptions: true,
 			showYear: true,
 			showRating: true,
 			showDate: false,
-			posterSize: 180,
+			galleryWidth: 80,
 			cornerRadius: 12,
 			refreshIntervalMinutes: 30,
 			refreshPolicy: 'manual',
@@ -61,30 +57,29 @@ describe('block parsing', () => {
 	});
 
 	it('ignores invalid typed values', () => {
-		expect(parseBlockConfig('count: 99\nlayout: carousel\nrender-mode: cards\nshow-date: sometimes\nposter-size: 133\ntimeout: 17')).toEqual({});
+		expect(parseBlockConfig('count: 99\nlayout: carousel\nshow-date: sometimes\ngallery-width: 73\ntimeout: 17')).toEqual({});
 	});
 
 	it('uses global settings for an empty block and lets block values override them', () => {
-		const settings = { ...DEFAULT_SETTINGS, username: 'global_user', count: 4, informationStyle: 'hover' as const };
+		const settings = { ...DEFAULT_SETTINGS, username: 'global_user', count: 4 };
 		expect(resolveGalleryConfig('', settings)).toEqual(settings);
 		expect(resolveGalleryConfig('username: block_user\ncount: 8', settings)).toMatchObject({
 			username: 'block_user',
 			count: 8,
 		});
-		expect(resolveGalleryConfig('show-rating: true', settings).informationStyle).toBe('hover');
+		expect(resolveGalleryConfig('show-rating: true', settings).showRating).toBe(true);
 	});
 });
 
 describe('settings normalization', () => {
 	it('restores safe defaults for invalid persisted values', () => {
-		const normalized = normalizeSettings({ count: 0, layout: 'other', posterSize: 133 });
+		const normalized = normalizeSettings({ count: 0, layout: 'other', galleryWidth: 73 });
 		expect(normalized.count).toBe(DEFAULT_SETTINGS.count);
 		expect(normalized.layout).toBe(DEFAULT_SETTINGS.layout);
-		expect(normalized.posterSize).toBe(DEFAULT_SETTINGS.posterSize);
+		expect(normalized.galleryWidth).toBe(DEFAULT_SETTINGS.galleryWidth);
 	});
 
-	it('migrates the previous gallery and caption settings to information styles', () => {
-		expect(normalizeSettings({ renderMode: 'gallery' }).informationStyle).toBe('cards');
-		expect(normalizeSettings({ showRating: true }).informationStyle).toBe('none');
+	it('ignores removed detailed-poster settings', () => {
+		expect(normalizeSettings({ removedDisplayStyle: 'cards' })).toEqual(DEFAULT_SETTINGS);
 	});
 });
