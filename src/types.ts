@@ -1,4 +1,3 @@
-export type GalleryLayout = 'strip' | 'grid';
 export type RefreshPolicy = 'open' | 'interval' | 'manual';
 
 export interface FilmEntry {
@@ -16,7 +15,6 @@ export interface FilmEntry {
 export interface PluginSettings {
 	username: string;
 	count: number;
-	layout: GalleryLayout;
 	gap: number;
 	heading: string;
 	showHeading: boolean;
@@ -25,6 +23,7 @@ export interface PluginSettings {
 	showRating: boolean;
 	showDate: boolean;
 	galleryWidth: number;
+	autoSize: boolean;
 	cornerRadius: number;
 	refreshIntervalMinutes: number;
 	refreshPolicy: RefreshPolicy;
@@ -43,7 +42,7 @@ export interface PluginData {
 	cache: Record<string, CacheEntry>;
 }
 
-export const GALLERY_WIDTHS = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100] as const;
+export const GALLERY_WIDTHS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100] as const;
 export const CORNER_RADII = [0, 4, 6, 8, 12, 16] as const;
 export const GAPS = [0, 2, 4, 8] as const;
 export const REFRESH_INTERVALS = [5, 15, 30, 60, 180, 360, 720, 1440] as const;
@@ -52,8 +51,7 @@ export const TIMEOUT_SECONDS = [5, 10, 15, 20, 30] as const;
 export const DEFAULT_SETTINGS: PluginSettings = {
 	username: '',
 	count: 6,
-	layout: 'grid',
-	gap: 4,
+	gap: 0,
 	heading: 'Recently watched',
 	showHeading: false,
 	showCaptions: false,
@@ -61,6 +59,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	showRating: false,
 	showDate: false,
 	galleryWidth: 75,
+	autoSize: true,
 	cornerRadius: 6,
 	refreshIntervalMinutes: 60,
 	refreshPolicy: 'open',

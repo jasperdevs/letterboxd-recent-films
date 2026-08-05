@@ -61,38 +61,44 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Movies shown')
-			.setDesc('Show exactly this many newest diary entries. Every selected movie appears together.')
+			.setDesc('Choose up to 100 recent entries, or max for everything returned by the RSS feed.')
 			.addSlider((slider) => slider
-				.setLimits(1, 20, 1)
-				.setValue(this.plugin.settings.count)
+				.setLimits(1, 101, 1)
+				.setValue(this.plugin.settings.count === 0 ? 101 : this.plugin.settings.count)
+				.setInstant(false)
+				.setDisplayFormat((value) => value === 101 ? 'Max' : String(value))
 				.onChange(async (value) => {
-					this.plugin.settings.count = value;
+					this.plugin.settings.count = value === 101 ? 0 : value;
 					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Layout')
-			.setDesc('Grid wraps naturally. Single row scales every selected movie to fit the note.')
-			.addDropdown((dropdown) => dropdown
-				.addOption('grid', 'Grid (recommended)')
-				.addOption('strip', 'Single fitted row')
-				.setValue(this.plugin.settings.layout)
-				.onChange(async (value) => {
-					this.plugin.settings.layout = value === 'grid' ? 'grid' : 'strip';
-					await this.plugin.saveSettings();
-					this.renderSettings();
 				}));
 
 		new Setting(containerEl).setName('Appearance').setHeading();
 
 		new Setting(containerEl)
-			.setName('Gallery size')
-			.setDesc('Width of the complete collage as a percentage of the note.')
+			.setName('Automatic size')
+			.setDesc('Keep one or two posters compact and larger sets readable without shrinking them into thumbnails.')
+			.addToggle((toggle) => toggle
+				.setValue(this.plugin.settings.autoSize)
+				.onChange(async (value) => {
+					this.plugin.settings.autoSize = value;
+					await this.plugin.saveSettings();
+					this.renderSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Manual width')
+			.setDesc(this.plugin.settings.autoSize
+				? 'Drag the collage edge to switch to manual sizing, or turn off Automatic size.'
+				: 'Maximum width of the complete collage. You can also drag its bottom-right corner.')
 			.addSlider((slider) => slider
-				.setLimits(40, 100, 5)
+				.setLimits(10, 100, 5)
 				.setValue(this.plugin.settings.galleryWidth)
+				.setDisabled(this.plugin.settings.autoSize)
+				.setInstant(false)
+				.setDisplayFormat((value) => `${value}%`)
 				.onChange(async (value) => {
 					this.plugin.settings.galleryWidth = value;
+					this.plugin.settings.autoSize = false;
 					await this.plugin.saveSettings();
 				}));
 
@@ -119,7 +125,7 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Advanced settings')
-			.setDesc('Spacing, corner radius, tooltip details, refresh behavior, and cache tools.')
+			.setDesc('Spacing, corner radius, optional captions, refresh behavior, and cache tools.')
 			.addButton((button) => button
 				.setButtonText(this.showAdvanced ? 'Hide advanced' : 'Show advanced')
 				.onClick(() => {
@@ -154,13 +160,13 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName('Film information')
-			.setDesc('Choose the information included when a poster is hovered or keyboard-focused.')
+			.setName('Captions under posters')
+			.setDesc('Hover always shows the complete film information. These options add selected details under each poster.')
 			.setHeading();
-		this.addToggle('Show titles', 'Show film titles.', 'showCaptions');
-		this.addToggle('Show year', 'Show each film’s release year.', 'showYear');
-		this.addToggle('Show rating', 'Show the diary entry rating.', 'showRating');
-		this.addToggle('Show watched date', 'Show the diary watched date.', 'showDate');
+		this.addToggle('Title', 'Add the film title below each poster.', 'showCaptions');
+		this.addToggle('Year', 'Add the release year.', 'showYear');
+		this.addToggle('Rating', 'Add the diary entry rating.', 'showRating');
+		this.addToggle('Watched date', 'Add the watched date.', 'showDate');
 
 		new Setting(containerEl).setName('Updates and cache').setHeading();
 

@@ -3,11 +3,8 @@ import { balancedGridColumns, getCollageCell, getCollageLayout, responsiveGridCo
 import { DEFAULT_SETTINGS } from '../src/types';
 
 describe('poster collage layout', () => {
-	it('creates one poster-only image row for strip layout', () => {
-		const layout = getCollageLayout(6, {
-			...DEFAULT_SETTINGS,
-			layout: 'strip',
-		});
+	it('creates a six-poster source row', () => {
+		const layout = getCollageLayout(6, DEFAULT_SETTINGS, 6);
 		expect(layout).toEqual({
 			featured: false,
 			columns: 6,
@@ -16,9 +13,9 @@ describe('poster collage layout', () => {
 			posterHeight: 450,
 			captionHeight: 0,
 			cellHeight: 450,
-			width: 1820,
+			width: 1800,
 			height: 450,
-			gap: 4,
+			gap: 0,
 		});
 	});
 
@@ -49,19 +46,21 @@ describe('poster collage layout', () => {
 		expect(pair.width).toBe(604);
 	});
 
-	it('wraps a poster-only grid without embedded captions', () => {
+	it('reserves caption space only for the selected under-poster fields', () => {
 		const layout = getCollageLayout(6, {
 			...DEFAULT_SETTINGS,
-			layout: 'grid',
+			showCaptions: true,
+			showYear: true,
+			showRating: true,
 		}, 3);
 		expect(layout).toMatchObject({
 			columns: 3,
 			rows: 2,
-			captionHeight: 0,
-			cellHeight: 450,
-			width: 908,
-			height: 904,
-			gap: 4,
+			captionHeight: 88,
+			cellHeight: 538,
+			width: 900,
+			height: 1076,
+			gap: 0,
 		});
 	});
 

@@ -2,6 +2,8 @@ import type { GalleryConfig } from './types';
 
 const POSTER_ASPECT_RATIO = 1.5;
 const POSTER_WIDTH = 300;
+export const COLLAGE_CAPTION_LINE_HEIGHT = 18;
+export const COLLAGE_CAPTION_PADDING = 8;
 
 export interface CollageLayout {
 	featured: boolean;
@@ -47,29 +49,15 @@ export function getCollageLayout(
 	_availableWidth?: number,
 ): CollageLayout {
 	const safeCount = Math.max(1, filmCount);
-	if (safeCount === 1 && config.count === 1) {
-		const posterWidth = POSTER_WIDTH;
-		const posterHeight = Math.round(posterWidth * POSTER_ASPECT_RATIO);
-		return {
-			featured: false,
-			columns: 1,
-			rows: 1,
-			posterWidth,
-			posterHeight,
-			captionHeight: 0,
-			cellHeight: posterHeight,
-			width: posterWidth,
-			height: posterHeight,
-			gap: 0,
-		};
-	}
-	const columns = config.layout === 'strip'
-		? safeCount
-		: Math.min(columnOverride ?? balancedGridColumns(safeCount, 6), safeCount);
+	const columns = Math.min(columnOverride ?? balancedGridColumns(safeCount, 6), safeCount);
 	const rows = Math.ceil(safeCount / columns);
 	const posterWidth = POSTER_WIDTH;
 	const posterHeight = Math.round(posterWidth * POSTER_ASPECT_RATIO);
-	const captionHeight = 0;
+	const captionLines = (config.showCaptions ? 2 : 0) +
+		(config.showYear || config.showRating || config.showDate ? 2 : 0);
+	const captionHeight = captionLines > 0
+		? captionLines * COLLAGE_CAPTION_LINE_HEIGHT + COLLAGE_CAPTION_PADDING * 2
+		: 0;
 	const cellHeight = posterHeight + captionHeight;
 	const gap = config.gap;
 	return {

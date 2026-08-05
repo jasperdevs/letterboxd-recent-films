@@ -26,7 +26,6 @@ describe('block parsing', () => {
 		expect(parseBlockConfig([
 			'username: movie_fan',
 			'count: 12',
-			'layout: grid',
 			'gap: 4',
 			'heading: Diary: this week',
 			'show-captions: true',
@@ -34,6 +33,7 @@ describe('block parsing', () => {
 			'show-rating: true',
 			'show-date: false',
 			'gallery-width: 80',
+			'auto-size: false',
 			'corner-radius: 12',
 			'refresh-interval: 30',
 			'refresh-policy: manual',
@@ -41,7 +41,6 @@ describe('block parsing', () => {
 		].join('\n'))).toEqual({
 			username: 'movie_fan',
 			count: 12,
-			layout: 'grid',
 			gap: 4,
 			heading: 'Diary: this week',
 			showCaptions: true,
@@ -49,6 +48,7 @@ describe('block parsing', () => {
 			showRating: true,
 			showDate: false,
 			galleryWidth: 80,
+			autoSize: false,
 			cornerRadius: 12,
 			refreshIntervalMinutes: 30,
 			refreshPolicy: 'manual',
@@ -57,7 +57,8 @@ describe('block parsing', () => {
 	});
 
 	it('ignores invalid typed values', () => {
-		expect(parseBlockConfig('count: 99\nlayout: carousel\nshow-date: sometimes\ngallery-width: 73\ntimeout: 17')).toEqual({});
+		expect(parseBlockConfig('count: 101\nshow-date: sometimes\ngallery-width: 73\ntimeout: 17')).toEqual({});
+		expect(parseBlockConfig('count: max')).toEqual({ count: 0 });
 	});
 
 	it('uses global settings for an empty block and lets block values override them', () => {
@@ -73,9 +74,8 @@ describe('block parsing', () => {
 
 describe('settings normalization', () => {
 	it('restores safe defaults for invalid persisted values', () => {
-		const normalized = normalizeSettings({ count: 0, layout: 'other', galleryWidth: 73 });
+		const normalized = normalizeSettings({ count: -1, galleryWidth: 73 });
 		expect(normalized.count).toBe(DEFAULT_SETTINGS.count);
-		expect(normalized.layout).toBe(DEFAULT_SETTINGS.layout);
 		expect(normalized.galleryWidth).toBe(DEFAULT_SETTINGS.galleryWidth);
 	});
 

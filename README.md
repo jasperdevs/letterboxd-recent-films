@@ -21,9 +21,9 @@ Or override settings for one gallery:
 ```letterboxd-recent
 username: movie_fan
 count: 6
-layout: grid
 gap: 4
 gallery-width: 75
+auto-size: true
 heading: Recently watched
 show-captions: false
 show-rating: false
@@ -34,11 +34,11 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-The `count` option is final: the gallery shows exactly that many newest entries and does not add pagination or hidden older pages.
+The `count` option is final: choose `1`–`100`, or `max` for every entry returned by the RSS feed. The gallery does not add pagination or hidden older pages.
 
-The collage supports a **Grid** and a **Single fitted row**. Grid balances rows without hiding entries. Single fitted row keeps every selected movie on one line. Both remain left-aligned and scale to the selected gallery width.
+The collage chooses its own balanced grid. One or two posters stay compact, ordinary sets use a readable row or grid, and large feeds add rows instead of shrinking every poster into a thumbnail.
 
-Use the **Gallery size** slider to set the complete collage width from 40% to 100% of the note. The default is 75%.
+Automatic sizing is enabled by default. Turn it off to use the 10%–100% width slider, or hover the collage and drag its bottom-right corner horizontally or vertically. Double-click the handle to restore automatic sizing.
 
 ## Block options
 
@@ -47,10 +47,10 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | Option | Values |
 | --- | --- |
 | `username` | A valid public Letterboxd username |
-| `count` | `1`–`20` |
-| `layout` | `strip` or `grid` |
+| `count` | `1`–`100`, or `max` |
 | `gap` | `0`, `2`, `4`, or `8` pixels |
-| `gallery-width` | `40`–`100` in increments of `5` |
+| `gallery-width` | `10`–`100` in increments of `5` |
+| `auto-size` | `true` or `false` |
 | `heading` | Plain text, up to 120 characters |
 | `show-heading` | `true` or `false` |
 | `show-captions` | `true` or `false` |
@@ -64,11 +64,11 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 ## Settings
 
-Global settings cover the username, newest movies shown, fitted-row/Grid layout, gallery width, poster gap, optional heading, tooltip fields, outer corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
+Global settings cover the username, newest movies shown, automatic/manual sizing, poster gap, optional heading, under-poster captions, outer corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
 
-The settings screen shows username, movies shown, layout, gallery size, and the heading toggle first. **Show advanced** reveals spacing, the collage's outer radius, tooltip information, refresh behavior, and cache tools.
+The settings screen shows username, movies shown, automatic/manual sizing, and the heading toggle first. **Show advanced** reveals spacing, the collage's outer radius, optional captions, refresh behavior, and cache tools.
 
-The plugin has one presentation style: a poster collage with square inner poster edges. The corner-radius setting clips only the outside of the complete image. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus.
+The plugin has one presentation style: a poster collage with square inner poster edges. The corner-radius setting clips only the outside of the complete image. Hover or keyboard focus always shows title, year, rating, and watched date when available. Caption toggles independently control what is drawn below each poster.
 
 Poster URLs are taken directly from each Letterboxd RSS entry. The plugin has no custom-poster system and does not replace or download posters into the vault. The feed does not provide a separate official backdrop, and the plugin does not request one from TMDB.
 
@@ -88,7 +88,7 @@ The plugin requests `https://letterboxd.com/{username}/rss/` with Obsidian's sup
 
 The recommended **When a gallery is viewed** refresh policy checks the feed when you open/view a gallery and suppresses duplicate requests caused by quick Live Preview remounts. **After the cache interval** uses the selected freshness interval. **Manual only** uses the last saved result until you run **Refresh galleries**; it still makes an initial request when no saved result exists. None of these policies polls Letterboxd in the background.
 
-In fitted-row layout, every selected poster remains visible on one line. The gallery-size percentage controls the complete row directly.
+Large galleries use balanced rows automatically, while manual width changes scale the complete collage without changing its poster order.
 
 The gallery includes dedicated loading, empty, offline, missing-user, timeout, malformed-feed, and invalid-username states. Missing or failed posters use placeholders. Images are lazy-loaded and are never downloaded into the vault.
 

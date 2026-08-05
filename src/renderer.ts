@@ -11,6 +11,7 @@ import { FeedError, fetchLetterboxdFeed } from './rss-client';
 import type { FilmEntry, GalleryConfig, PluginSettings } from './types';
 
 type SettingsProvider = () => PluginSettings;
+type ResizeCallback = (width: number | null) => Promise<void>;
 
 export class GalleryRuntime {
 	readonly collages = new CollageCache();
@@ -87,7 +88,6 @@ function applyRootClasses(container: HTMLElement, config: GalleryConfig): void {
 	}
 	container.addClass(
 		'lrf-root',
-		`lrf-layout-${config.layout}`,
 		`lrf-radius-${config.cornerRadius}`,
 		`lrf-gap-${config.gap}`,
 		`lrf-count-${config.count}`,
@@ -101,17 +101,20 @@ function renderLoading(container: HTMLElement, config: GalleryConfig): void {
 	const status = container.createDiv({ cls: 'lrf-loading-label', text: 'Loading recent films…' });
 	status.setAttr('role', 'status');
 	const gallery = container.createDiv({ cls: 'lrf-gallery lrf-loading' });
-	for (let index = 0; index < Math.min(config.count, 6); index += 1) gallery.createDiv({ cls: 'lrf-skeleton' });
+	const loadingCount = config.count === 0 ? 6 : Math.min(config.count, 6);
+	for (let index = 0; index < loadingCount; index += 1) gallery.createDiv({ cls: 'lrf-skeleton' });
 }
 
-function selectedInformation(film: FilmEntry, config: GalleryConfig): { title: string; details: string[] } {
-	const anySelected = config.showCaptions || config.showYear || config.showRating || config.showDate;
-	const title = config.showCaptions || !anySelected ? film.title : '';
+function hoverInformation(film: FilmEntry): { title: string; details: string[] } {
 	const details: string[] = [];
-	if (config.showYear && film.year) details.push(String(film.year));
-	if (config.showRating && film.rating) details.push(formatRating(film.rating));
-	if (config.showDate) details.push(formatDate(film.watchedDate));
-	return { title, details };
+	if (film.year) details.push(String(film.year));
+	if (film.rating) details.push(formatRating(film.rating));
+	details.push(formatDate(film.watchedDate));
+	return { title: film.title, details };
+}
+
+function selectedFilms(films: FilmEntry[], count: number): FilmEntry[] {
+	return count === 0 ? films : films.slice(0, count);
 }
 
 function addCacheStatus(container: HTMLElement, result: CacheResult): void {
@@ -143,6 +146,7 @@ function renderCollage(
 	films: FilmEntry[],
 	asset: CollageAsset,
 	url: string,
+	onResize: ResizeCallback,
 ): void {
 	container.empty();
 	applyRootClasses(container, config);
@@ -151,7 +155,10 @@ function renderCollage(
 	addCacheStatus(container, result);
 	const scroll = container.createDiv({ cls: 'lrf-collage-scroll' });
 	const wrapper = scroll.createDiv({ cls: 'lrf-collage-wrap' });
-	wrapper.style.setProperty('width', `${config.galleryWidth}%`);
+	const naturalWidth = asset.columns * 132 + Math.max(0, asset.columns - 1) * config.gap;
+	wrapper.style.setProperty('width', config.autoSize
+		? `min(100%, ${naturalWidth}px)`
+		: `${config.galleryWidth}%`);
 	wrapper.createEl('img', {
 		cls: 'lrf-collage-image',
 		attr: {
@@ -166,7 +173,7 @@ function renderCollage(
 	const links = wrapper.createDiv({ cls: 'lrf-collage-links' });
 	for (const [index, film] of films.entries()) {
 		const cell = getCollageCell(asset, index, films.length);
-		const information = selectedInformation(film, config);
+		const information = hoverInformation(film);
 		const tooltipParts = [film.title, ...information.details];
 		const link = links.createEl('a', {
 			cls: 'lrf-collage-link',
@@ -182,6 +189,86 @@ function renderCollage(
 		link.style.setProperty('width', percentage(cell.width, asset.width));
 		link.style.setProperty('height', percentage(cell.height, asset.height));
 	}
+	addResizeHandle(wrapper, scroll, config.galleryWidth, onResize);
+}
+
+function addResizeHandle(
+	wrapper: HTMLElement,
+	host: HTMLElement,
+	configuredWidth: number,
+	onResize: ResizeCallback,
+): void {
+	let startX = 0;
+	let startY = 0;
+	let startWidth = 0;
+	let aspectRatio = 1;
+	let currentPercent = configuredWidth;
+	type Direction = 'horizontal' | 'vertical' | 'both';
+	const handles: HTMLElement[] = [];
+	const updateWidth = (pixels: number): void => {
+		const hostWidth = Math.max(1, host.clientWidth);
+		currentPercent = Math.round(Math.max(10, Math.min(100, pixels / hostWidth * 100)));
+		wrapper.style.setProperty('width', `${currentPercent}%`);
+		for (const handle of handles) handle.setAttr('aria-valuenow', String(currentPercent));
+	};
+	const createHandle = (direction: Direction, label: string): void => {
+		const handle = wrapper.createDiv({
+			cls: `lrf-resize-handle lrf-resize-${direction}`,
+			attr: {
+				role: 'slider',
+				tabindex: direction === 'both' ? '0' : '-1',
+				'aria-label': `${label}. Double-click to restore automatic sizing.`,
+				'aria-valuemin': '10',
+				'aria-valuemax': '100',
+				'aria-valuenow': String(configuredWidth),
+			},
+		});
+		handles.push(handle);
+		handle.addEventListener('pointerdown', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			const rectangle = wrapper.getBoundingClientRect();
+			startX = event.clientX;
+			startY = event.clientY;
+			startWidth = rectangle.width;
+			aspectRatio = rectangle.height > 0 ? rectangle.width / rectangle.height : 1;
+			handle.setPointerCapture(event.pointerId);
+			wrapper.addClass('is-resizing');
+		});
+		handle.addEventListener('pointermove', (event) => {
+			if (!handle.hasPointerCapture(event.pointerId)) return;
+			const horizontal = event.clientX - startX;
+			const vertical = (event.clientY - startY) * aspectRatio;
+			const delta = direction === 'horizontal' ? horizontal : direction === 'vertical' ? vertical :
+				(Math.abs(horizontal) >= Math.abs(vertical) ? horizontal : vertical);
+			updateWidth(startWidth + delta);
+		});
+		const finishResize = (event: PointerEvent): void => {
+			if (!handle.hasPointerCapture(event.pointerId)) return;
+			handle.releasePointerCapture(event.pointerId);
+			wrapper.removeClass('is-resizing');
+			void onResize(Math.round(currentPercent / 5) * 5);
+		};
+		handle.addEventListener('pointerup', finishResize);
+		handle.addEventListener('pointercancel', finishResize);
+		handle.addEventListener('dblclick', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			void onResize(null);
+		});
+		handle.addEventListener('keydown', (event) => {
+			if (!['ArrowLeft', 'ArrowDown', 'ArrowRight', 'ArrowUp'].includes(event.key)) return;
+			event.preventDefault();
+			const change = event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -5 : 5;
+			currentPercent = Math.max(10, Math.min(100, currentPercent + change));
+			wrapper.style.setProperty('width', `${currentPercent}%`);
+			for (const item of handles) item.setAttr('aria-valuenow', String(currentPercent));
+			void onResize(currentPercent);
+		});
+	};
+	createHandle('horizontal', 'Drag the right edge to resize the gallery width');
+	createHandle('vertical', 'Drag the bottom edge to resize the gallery height proportionally');
+	createHandle('both', 'Drag the corner to resize the gallery proportionally');
 }
 
 export class GalleryView {
@@ -194,6 +281,7 @@ export class GalleryView {
 		private readonly getSettings: SettingsProvider,
 		private readonly cache: FeedCache,
 		private readonly runtime: GalleryRuntime,
+		private readonly onResize: ResizeCallback,
 		private readonly notifyLayout: () => void = () => undefined,
 	) {}
 
@@ -214,8 +302,8 @@ export class GalleryView {
 		let hasStableImage = false;
 		if (saved && saved.films.length > 0) {
 			const savedResult: CacheResult = { ...saved, source: 'cache' };
-			const films = saved.films.slice(0, config.count);
-			const columns = this.effectiveColumns(config, films.length);
+			const films = selectedFilms(saved.films, config.count);
+			const columns = this.effectiveColumns(films.length);
 			const key = collageCacheKey(films, config, columns, this.container.ownerDocument);
 			const asset = this.runtime.collages.peek(key);
 			if (asset) {
@@ -237,8 +325,8 @@ export class GalleryView {
 				force || firstView,
 			);
 			if (this.disposed || currentRun !== this.run) return;
-			const films = result.films.slice(0, config.count);
-			const columns = this.effectiveColumns(config, films.length);
+			const films = selectedFilms(result.films, config.count);
+			const columns = this.effectiveColumns(films.length);
 			if (films.length === 0) {
 				renderEmpty(this.container, result, config);
 			} else {
@@ -263,9 +351,9 @@ export class GalleryView {
 		this.run += 1;
 	}
 
-	private effectiveColumns(config: GalleryConfig, filmCount: number): number {
-		if (config.layout === 'strip') return Math.max(1, filmCount);
-		return balancedGridColumns(filmCount, Math.min(6, Math.max(1, filmCount)));
+	private effectiveColumns(filmCount: number): number {
+		const maximum = filmCount >= 15 ? 5 : 6;
+		return balancedGridColumns(filmCount, Math.min(maximum, Math.max(1, filmCount)));
 	}
 
 	private showCollage(
@@ -276,7 +364,7 @@ export class GalleryView {
 		asset: CollageAsset,
 	): void {
 		const url = this.runtime.collages.objectUrl(key, this.container.ownerDocument);
-		renderCollage(this.container, result, config, films, asset, url);
+		renderCollage(this.container, result, config, films, asset, url, this.onResize);
 	}
 
 	private renderError(config: GalleryConfig, title: string, detail: string): void {

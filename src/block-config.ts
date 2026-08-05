@@ -6,7 +6,6 @@ import {
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
 	type GalleryConfig,
-	type GalleryLayout,
 	type PluginSettings,
 	type RefreshPolicy,
 } from './types';
@@ -41,10 +40,6 @@ function stringValue(value: unknown, fallback: string, maxLength: number): strin
 	return typeof value === 'string' ? value.slice(0, maxLength) : fallback;
 }
 
-function layoutValue(value: unknown, fallback: GalleryLayout): GalleryLayout {
-	return value === 'strip' || value === 'grid' ? value : fallback;
-}
-
 function refreshPolicyValue(value: unknown, fallback: RefreshPolicy): RefreshPolicy {
 	return value === 'open' || value === 'interval' || value === 'manual' ? value : fallback;
 }
@@ -53,8 +48,7 @@ export function normalizeSettings(value: unknown): PluginSettings {
 	const input = isRecord(value) ? value : {};
 	return {
 		username: stringValue(input.username, DEFAULT_SETTINGS.username, 15).trim(),
-		count: finiteInteger(input.count, DEFAULT_SETTINGS.count, 1, 20),
-		layout: layoutValue(input.layout, DEFAULT_SETTINGS.layout),
+		count: finiteInteger(input.count, DEFAULT_SETTINGS.count, 0, 100),
 		gap: allowedNumber(input.gap, DEFAULT_SETTINGS.gap, GAPS),
 		heading: stringValue(input.heading, DEFAULT_SETTINGS.heading, 120),
 		showHeading: booleanValue(input.showHeading, DEFAULT_SETTINGS.showHeading),
@@ -63,6 +57,7 @@ export function normalizeSettings(value: unknown): PluginSettings {
 		showRating: booleanValue(input.showRating, DEFAULT_SETTINGS.showRating),
 		showDate: booleanValue(input.showDate, DEFAULT_SETTINGS.showDate),
 		galleryWidth: allowedNumber(input.galleryWidth, DEFAULT_SETTINGS.galleryWidth, GALLERY_WIDTHS),
+		autoSize: booleanValue(input.autoSize, DEFAULT_SETTINGS.autoSize),
 		cornerRadius: allowedNumber(input.cornerRadius, DEFAULT_SETTINGS.cornerRadius, CORNER_RADII),
 		refreshIntervalMinutes: allowedNumber(
 			input.refreshIntervalMinutes,
@@ -109,13 +104,14 @@ export function parseBlockConfig(source: string): BlockOverrides {
 				overrides.username = value.slice(0, 100);
 				break;
 			case 'count': {
-				const parsed = parseInteger(value, 1, 20);
+				if (value.toLowerCase() === 'max') {
+					overrides.count = 0;
+					break;
+				}
+				const parsed = parseInteger(value, 1, 100);
 				if (parsed !== undefined) overrides.count = parsed;
 				break;
 			}
-			case 'layout':
-				if (value === 'strip' || value === 'grid') overrides.layout = value;
-				break;
 			case 'gap': {
 				const parsed = parseAllowedInteger(value, GAPS);
 				if (parsed !== undefined) overrides.gap = parsed;
@@ -127,6 +123,11 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			case 'gallery-width': {
 				const parsed = parseAllowedInteger(value, GALLERY_WIDTHS);
 				if (parsed !== undefined) overrides.galleryWidth = parsed;
+				break;
+			}
+			case 'auto-size': {
+				const parsed = parseBoolean(value);
+				if (parsed !== undefined) overrides.autoSize = parsed;
 				break;
 			}
 			case 'corner-radius': {

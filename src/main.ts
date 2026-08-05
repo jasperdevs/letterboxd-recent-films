@@ -184,6 +184,14 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 			() => this.settings,
 			this.cache,
 			this.runtime,
+			async (width) => {
+				if (width === null) this.settings.autoSize = true;
+				else {
+					this.settings.autoSize = false;
+					this.settings.galleryWidth = width;
+				}
+				await this.saveSettings();
+			},
 			notifyLayout,
 		);
 		this.galleries.add(view);

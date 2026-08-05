@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file.
 - Clarify that posters come directly from Letterboxd RSS and remove custom-poster language.
 - Remove detailed-poster mode and its display selector in favor of one poster collage with optional heading and tooltip details.
 - Replace ineffective per-poster sizing with a left-aligned gallery-width control and clip the outer collage radius reliably.
+- Add automatic sparse/dense sizing plus a keyboard-accessible bottom-right resize handle with a 10%–100% manual range.
+- Extend Movies shown to 100 entries and a Max option that uses every RSS entry returned.
+- Make complete film information the default hover behavior and use the existing field toggles only for captions below posters.
+- Remove manual layout selection in favor of one automatically balanced responsive grid.
 
 ## 1.0.1 - 2026-08-05
 
