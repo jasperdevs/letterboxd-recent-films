@@ -79,18 +79,13 @@ function renderState(container: HTMLElement, title: string, detail: string): voi
 
 function applyRootClasses(container: HTMLElement, config: GalleryConfig): void {
 	for (const className of Array.from(container.classList)) {
-		if (className === 'lrf-root' || className === 'lrf-render-collage' ||
-			className.startsWith('lrf-layout-') || className.startsWith('lrf-poster-') ||
-			className.startsWith('lrf-radius-') ||
-			className.startsWith('lrf-gap-') || className.startsWith('lrf-count-')) {
+		if (className === 'lrf-root' || className === 'lrf-render-collage' || className.startsWith('lrf-radius-')) {
 			container.removeClass(className);
 		}
 	}
 	container.addClass(
 		'lrf-root',
 		`lrf-radius-${config.cornerRadius}`,
-		`lrf-gap-${config.gap}`,
-		`lrf-count-${config.count}`,
 	);
 }
 
@@ -163,7 +158,7 @@ function renderCollage(
 		cls: 'lrf-collage-image',
 		attr: {
 			src: url,
-			alt: `Poster collage: ${films.map((film) => film.title).join(', ')}`,
+			alt: `Poster collage of ${films.length} recent ${films.length === 1 ? 'film' : 'films'}`,
 			width: String(asset.width),
 			height: String(asset.height),
 			loading: 'lazy',
@@ -203,6 +198,7 @@ function addResizeHandle(
 	let startWidth = 0;
 	let aspectRatio = 1;
 	let currentPercent = configuredWidth;
+	let moved = false;
 	type Direction = 'horizontal' | 'vertical' | 'both';
 	const handles: HTMLElement[] = [];
 	const updateWidth = (pixels: number): void => {
@@ -224,6 +220,13 @@ function addResizeHandle(
 			},
 		});
 		handles.push(handle);
+		handle.addEventListener('focus', () => {
+			currentPercent = Math.round(Math.max(
+				10,
+				Math.min(100, wrapper.getBoundingClientRect().width / Math.max(1, host.clientWidth) * 100),
+			));
+			handle.setAttr('aria-valuenow', String(currentPercent));
+		});
 		handle.addEventListener('pointerdown', (event) => {
 			event.preventDefault();
 			event.stopPropagation();
@@ -233,6 +236,9 @@ function addResizeHandle(
 			startWidth = rectangle.width;
 			aspectRatio = rectangle.height > 0 ? rectangle.width / rectangle.height : 1;
 			handle.setPointerCapture(event.pointerId);
+			currentPercent = Math.round(Math.max(10, Math.min(100, rectangle.width / Math.max(1, host.clientWidth) * 100)));
+			for (const item of handles) item.setAttr('aria-valuenow', String(currentPercent));
+			moved = false;
 			wrapper.addClass('is-resizing');
 		});
 		handle.addEventListener('pointermove', (event) => {
@@ -241,16 +247,22 @@ function addResizeHandle(
 			const vertical = (event.clientY - startY) * aspectRatio;
 			const delta = direction === 'horizontal' ? horizontal : direction === 'vertical' ? vertical :
 				(Math.abs(horizontal) >= Math.abs(vertical) ? horizontal : vertical);
+			if (Math.abs(delta) < 2) return;
+			moved = true;
 			updateWidth(startWidth + delta);
 		});
 		const finishResize = (event: PointerEvent): void => {
 			if (!handle.hasPointerCapture(event.pointerId)) return;
 			handle.releasePointerCapture(event.pointerId);
 			wrapper.removeClass('is-resizing');
-			void onResize(Math.round(currentPercent / 5) * 5);
+			if (moved) void onResize(Math.round(currentPercent / 5) * 5);
 		};
 		handle.addEventListener('pointerup', finishResize);
-		handle.addEventListener('pointercancel', finishResize);
+		handle.addEventListener('pointercancel', (event) => {
+			if (!handle.hasPointerCapture(event.pointerId)) return;
+			handle.releasePointerCapture(event.pointerId);
+			wrapper.removeClass('is-resizing');
+		});
 		handle.addEventListener('dblclick', (event) => {
 			event.preventDefault();
 			event.stopPropagation();

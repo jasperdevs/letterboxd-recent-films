@@ -123,7 +123,7 @@ function drawCaption(
 	let lineY = y + layout.posterHeight + COLLAGE_CAPTION_PADDING;
 	if (config.showCaptions) {
 		context.fillStyle = primaryText;
-		context.font = `600 13px ${fontFamily}`;
+		context.font = `600 32px ${fontFamily}`;
 		for (const line of wrappedLines(
 			context,
 			film.title,
@@ -142,7 +142,7 @@ function drawCaption(
 	if (config.showDate) details.push(film.watchedDate);
 	if (details.length === 0) return;
 	context.fillStyle = mutedText;
-	context.font = `12px ${fontFamily}`;
+	context.font = `28px ${fontFamily}`;
 	for (const line of wrappedLines(
 		context,
 		details.join(' · '),

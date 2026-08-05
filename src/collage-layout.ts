@@ -2,8 +2,8 @@ import type { GalleryConfig } from './types';
 
 const POSTER_ASPECT_RATIO = 1.5;
 const POSTER_WIDTH = 300;
-export const COLLAGE_CAPTION_LINE_HEIGHT = 18;
-export const COLLAGE_CAPTION_PADDING = 8;
+export const COLLAGE_CAPTION_LINE_HEIGHT = 40;
+export const COLLAGE_CAPTION_PADDING = 16;
 
 export interface CollageLayout {
 	featured: boolean;

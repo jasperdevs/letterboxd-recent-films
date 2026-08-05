@@ -92,6 +92,7 @@ function parseAllowedInteger(value: string, allowed: readonly number[]): number 
 
 export function parseBlockConfig(source: string): BlockOverrides {
 	const overrides: BlockOverrides = {};
+	let hasAutoSizeOverride = false;
 
 	for (const rawLine of source.split(/\r?\n/)) {
 		const separator = rawLine.indexOf(':');
@@ -127,7 +128,10 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			}
 			case 'auto-size': {
 				const parsed = parseBoolean(value);
-				if (parsed !== undefined) overrides.autoSize = parsed;
+				if (parsed !== undefined) {
+					overrides.autoSize = parsed;
+					hasAutoSizeOverride = true;
+				}
 				break;
 			}
 			case 'corner-radius': {
@@ -170,6 +174,7 @@ export function parseBlockConfig(source: string): BlockOverrides {
 			}
 		}
 	}
+	if (overrides.galleryWidth !== undefined && !hasAutoSizeOverride) overrides.autoSize = false;
 
 	return overrides;
 }

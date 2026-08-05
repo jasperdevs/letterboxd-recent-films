@@ -56,10 +56,10 @@ describe('poster collage layout', () => {
 		expect(layout).toMatchObject({
 			columns: 3,
 			rows: 2,
-			captionHeight: 88,
-			cellHeight: 538,
+			captionHeight: 192,
+			cellHeight: 642,
 			width: 900,
-			height: 1076,
+			height: 1284,
 			gap: 0,
 		});
 	});

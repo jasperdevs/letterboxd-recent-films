@@ -61,6 +61,11 @@ describe('block parsing', () => {
 		expect(parseBlockConfig('count: max')).toEqual({ count: 0 });
 	});
 
+	it('treats an explicit gallery width as manual unless auto sizing is also explicit', () => {
+		expect(parseBlockConfig('gallery-width: 80')).toEqual({ galleryWidth: 80, autoSize: false });
+		expect(parseBlockConfig('gallery-width: 80\nauto-size: true')).toEqual({ galleryWidth: 80, autoSize: true });
+	});
+
 	it('uses global settings for an empty block and lets block values override them', () => {
 		const settings = { ...DEFAULT_SETTINGS, username: 'global_user', count: 4 };
 		expect(resolveGalleryConfig('', settings)).toEqual(settings);

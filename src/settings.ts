@@ -149,7 +149,7 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Poster gap')
-			.setDesc('Space between posters or cards.')
+			.setDesc('Space between posters in the collage.')
 			.addDropdown((dropdown) => {
 				for (const gap of GAPS) dropdown.addOption(String(gap), `${gap} px`);
 				dropdown.setValue(String(this.plugin.settings.gap));

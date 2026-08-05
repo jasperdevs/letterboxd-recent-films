@@ -23,7 +23,7 @@ username: movie_fan
 count: 6
 gap: 4
 gallery-width: 75
-auto-size: true
+auto-size: false
 heading: Recently watched
 show-captions: false
 show-rating: false
@@ -61,6 +61,8 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | `refresh-interval` | `5`, `15`, `30`, `60`, `180`, `360`, `720`, or `1440` minutes |
 | `refresh-policy` | `open`, `interval`, or `manual` |
 | `timeout` | `5`, `10`, `15`, `20`, or `30` seconds |
+
+Setting `gallery-width` in a block automatically selects manual sizing unless that block explicitly sets `auto-size: true`.
 
 ## Settings
 
