@@ -36,21 +36,9 @@ export function responsiveGridColumns(
 
 export function balancedGridColumns(filmCount: number, maximum: number): number {
 	const safeCount = Math.max(1, filmCount);
-	const safeMaximum = Math.max(1, Math.min(maximum, safeCount));
-	let bestColumns = 1;
-	let bestScore = Number.POSITIVE_INFINITY;
-	for (let columns = 1; columns <= safeMaximum; columns += 1) {
-		const rows = Math.ceil(safeCount / columns);
-		const lastRow = safeCount - (rows - 1) * columns;
-		const orphanPenalty = lastRow === 1 && rows > 1 ? 1000 : 0;
-		const raggedPenalty = columns - lastRow;
-		const score = orphanPenalty + raggedPenalty + rows * 5;
-		if (score <= bestScore) {
-			bestScore = score;
-			bestColumns = columns;
-		}
-	}
-	return bestColumns;
+	const columns = Math.max(1, Math.min(maximum, safeCount));
+	if (safeCount > columns && safeCount % columns === 1 && columns > 2) return columns - 1;
+	return columns;
 }
 
 export function getCollageLayout(

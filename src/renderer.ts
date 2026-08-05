@@ -451,7 +451,7 @@ export class GalleryView {
 	): void {
 		const button = parent.createEl('button', {
 			cls: `lrf-page-button lrf-page-${direction}`,
-			text: direction === 'previous' ? '‹' : '›',
+			text: direction === 'previous' ? '← Newer' : 'Older →',
 			attr: {
 				type: 'button',
 				'aria-label': `${direction === 'previous' ? 'Previous' : 'Next'} ${pageSize} films`,

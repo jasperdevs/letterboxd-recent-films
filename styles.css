@@ -221,18 +221,9 @@ body.theme-light .lrf-collage-image {
 .lrf-page-navigation {
 	align-items: center;
 	display: flex;
-	inset: 0;
+	gap: 10px;
 	justify-content: space-between;
-	opacity: 0;
-	pointer-events: none;
-	position: absolute;
-	transition: opacity 120ms ease;
-	z-index: 4;
-}
-
-.lrf-root:hover .lrf-page-navigation,
-.lrf-root:focus-within .lrf-page-navigation {
-	opacity: 1;
+	margin-top: var(--size-4-3);
 }
 
 .lrf-page-button {
@@ -245,19 +236,17 @@ body.theme-light .lrf-collage-image {
 	cursor: pointer;
 	display: flex;
 	font-family: var(--font-interface);
-	font-size: 28px;
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
 	height: 40px;
 	justify-content: center;
-	margin: 0 8px;
-	padding: 0 0 3px;
-	pointer-events: auto;
+	min-width: 90px;
+	padding: 0 12px;
 	transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease;
-	width: 40px;
 }
 
 .lrf-root .lrf-page-button:disabled {
-	cursor: default;
-	opacity: 0.36;
+	visibility: hidden;
 }
 
 .lrf-page-button:hover {
@@ -274,18 +263,11 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-page-status {
-	background: var(--background-primary-alt);
-	box-shadow: 0 0 0 1px var(--background-modifier-border);
-	border-radius: 999px;
-	bottom: 8px;
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	font-variant-numeric: tabular-nums;
-	left: 50%;
-	padding: 3px 8px;
-	position: absolute;
+	min-width: 42px;
 	text-align: center;
-	transform: translateX(-50%);
 }
 
 .lrf-caption {
@@ -371,12 +353,6 @@ body.theme-light .lrf-collage-image {
 
 	.lrf-page-navigation {
 		transition: none;
-	}
-}
-
-@media (hover: none) {
-	.lrf-page-navigation {
-		opacity: 1;
 	}
 }
 

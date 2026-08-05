@@ -79,9 +79,9 @@ describe('poster collage layout', () => {
 	});
 
 	it('balances common film counts without creating avoidable orphan rows', () => {
-		expect(balancedGridColumns(6, 5)).toBe(3);
-		expect(balancedGridColumns(7, 5)).toBe(4);
-		expect(balancedGridColumns(8, 5)).toBe(4);
+		expect(balancedGridColumns(6, 5)).toBe(4);
+		expect(balancedGridColumns(7, 5)).toBe(5);
+		expect(balancedGridColumns(8, 5)).toBe(5);
 		expect(balancedGridColumns(20, 5)).toBe(5);
 	});
 });

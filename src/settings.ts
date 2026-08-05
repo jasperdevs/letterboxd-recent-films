@@ -16,6 +16,8 @@ function minuteLabel(minutes: number): string {
 }
 
 export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
+	private showAdvanced = false;
+
 	constructor(private readonly plugin: LetterboxdRecentFilmsPlugin) {
 		super(plugin.app, plugin);
 	}
@@ -70,10 +72,10 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Layout')
-			.setDesc('Use a horizontally scrolling row or a wrapping grid.')
+			.setDesc('Grid shows every movie on the page. Scrolling row keeps one horizontal line.')
 			.addDropdown((dropdown) => dropdown
-				.addOption('strip', 'Row')
-				.addOption('grid', 'Grid')
+				.addOption('grid', 'Grid (recommended)')
+				.addOption('strip', 'Scrolling row')
 				.setValue(this.plugin.settings.layout)
 				.onChange(async (value) => {
 					this.plugin.settings.layout = value === 'grid' ? 'grid' : 'strip';
@@ -83,10 +85,10 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Display style')
-			.setDesc('Use one poster-only collage image or separate cards with readable film information.')
+			.setDesc('Poster collage is the clean default. Detailed posters add text underneath.')
 			.addDropdown((dropdown) => dropdown
-				.addOption('collage', 'Poster collage')
-				.addOption('gallery', 'Detailed cards')
+				.addOption('collage', 'Poster collage (recommended)')
+				.addOption('gallery', 'Detailed posters')
 				.setValue(this.plugin.settings.renderMode)
 				.onChange(async (value) => {
 					this.plugin.settings.renderMode = value === 'gallery' ? 'gallery' : 'collage';
@@ -107,6 +109,18 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 					this.plugin.settings.posterSize = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Advanced settings')
+			.setDesc('Heading, spacing, corner radius, film information, refresh behavior, and cache tools.')
+			.addButton((button) => button
+				.setButtonText(this.showAdvanced ? 'Hide advanced' : 'Show advanced')
+				.onClick(() => {
+					this.showAdvanced = !this.showAdvanced;
+					this.renderSettings();
+				}));
+
+		if (!this.showAdvanced) return;
 
 		new Setting(containerEl)
 			.setName('Corner radius')

@@ -39,6 +39,9 @@ All notable changes to this project will be documented in this file.
 - Use Obsidian theme variables for navigation controls in both light and dark themes.
 - Reorganize settings into clear task-based sections and place feed testing beside the username.
 - Make the movies-shown setting the single source of truth while automatically balancing each responsive grid.
+- Replace ambiguous overlay arrows with explicit Newer and Older page controls.
+- Collapse secondary options behind Show advanced while keeping every existing feature available.
+- Keep page contents strictly in RSS order and simplify grid packing to one predictable orphan-avoidance rule.
 
 ## 1.0.0 - 2026-08-05
 

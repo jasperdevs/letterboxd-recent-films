@@ -34,9 +34,9 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-When the RSS feed contains more entries than `count`, minimal previous/next arrows appear while the gallery is hovered or keyboard-focused. Each step shows the next `count` films and continues until the saved feed has no older entries. The arrows remain visible on touch devices.
+When the RSS feed contains more entries than `count`, clearly labeled **Newer** and **Older** controls appear below the gallery. Each page contains exactly `count` films in RSS order, so navigation never hides or reorders entries within a page.
 
-Both display styles support a horizontally scrolling **Row** and an automatic **Grid**. Grid mode measures the note, keeps posters at the selected size, and chooses a balanced arrangement that avoids one-poster final rows whenever possible. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image. Poster collages remain poster-only; hovering or keyboard-focusing a poster shows one Obsidian tooltip with its enabled information fields. A one-film collage is a centered poster rather than a simulated backdrop.
+Both display styles support a **Grid** and a **Scrolling row**. Grid is recommended: it measures the note, keeps posters at the selected size, fills strictly in RSS order, and uses one simple adjustment to avoid a single-poster final row. Scrolling row keeps every poster on one horizontal line and supports the wheel, trackpad, or drag. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
 
 Use the **Poster size** slider in plugin settings to scale poster width and height proportionally. The default is a compact `120 px`.
 
@@ -67,7 +67,7 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 Global settings cover the username, movies shown per page, poster-collage or detailed-card display, Row/Grid layout, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
 
-Settings are grouped into **Account**, **Gallery**, **Appearance**, **Film information**, and **Updates and cache**. The feed test is beside the username, and options that do not apply to the selected refresh policy stay hidden.
+The settings screen shows only the essentials by default: username, movies shown, display style, layout, and poster size. **Show advanced** reveals heading, spacing, radius, film information, refresh behavior, and cache tools without removing any features.
 
 **Poster collage** creates one image containing square-cornered inner posters, with the selected corner radius applied only to the outside of the complete collage. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
 
