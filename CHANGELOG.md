@@ -6,13 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Reset navigation to the newest page when the username or movies-per-page value changes.
 - Ignore superseded setting refreshes so rapid changes cannot restore an outdated collage.
-- Balance responsive grids evenly and restore compact hover/focus navigation controls.
-- Replace the count and poster-size sliders with explicit menus and use a comfortable default gap.
-- Fade horizontally overflowing rows instead of ending them with a hard clipped edge.
+- Make Movies shown final: render only the newest selected entries with no pagination, arrows, or hidden pages.
+- Fit every selected poster into single-row layouts without horizontal scrolling, clipping, or edge fades.
+- Use compact sliders for movie count and poster size instead of long option menus.
+- Balance responsive grids evenly and use a comfortable default gap.
 - Keep grid collages inside the note when Obsidian has not reported its final width yet.
-- Use stable, high-contrast Obsidian chevrons with larger pointer targets for gallery navigation.
+- Clarify that posters come directly from Letterboxd RSS and remove custom-poster language.
 
 ## 1.0.1 - 2026-08-05
 

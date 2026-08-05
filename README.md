@@ -1,6 +1,6 @@
 # Letterboxd Recent Films
 
-Show a Letterboxd user's latest public diary entries as a clickable poster collage inside any Obsidian note. By default, the plugin composes the posters into one PNG image in memory and wraps it into as many full-width posters as the note can fit. It can alternatively use a full-size scrolling strip or separate poster cards, add optional film information, inherit your Obsidian theme, and keep the last successful feed result available offline.
+Show a Letterboxd user's latest public diary entries as a clickable poster collage inside any Obsidian note. By default, the plugin composes the selected posters into one PNG image in memory. It can alternatively use separate poster cards, add optional film information, inherit your Obsidian theme, and keep the last successful feed result available offline.
 
 This is an unofficial community plugin. It is not affiliated with, endorsed by, or connected to Letterboxd or Obsidian.
 
@@ -34,11 +34,11 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-When the RSS feed contains more entries than `count`, compact previous and next arrows appear when the gallery is hovered or focused (and remain visible on touch devices). Each page contains exactly `count` films in RSS order. Changing the count returns to the newest page.
+The `count` option is final: the gallery shows exactly that many newest entries and does not add pagination or hidden older pages.
 
-Both display styles support a **Grid** and a **Scrolling row**. Grid is recommended: it measures the note, keeps posters at the selected size, fills strictly in RSS order, and balances the available rows without hiding entries. Scrolling row keeps every poster on one horizontal line and supports the wheel, trackpad, or drag. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
+Both display styles support a **Grid** and a **Single fitted row**. Grid is recommended: it measures the note, fills strictly in RSS order, and balances rows without hiding entries. Single fitted row keeps every selected movie on one line and scales the complete row to the note width. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
 
-Use the **Poster size** menu in plugin settings to scale poster width and height proportionally. The recommended default is `120 px`.
+Use the **Poster size** slider in plugin settings to set a maximum width. Posters shrink when necessary so they never leave the note. The recommended default is `120 px`.
 
 ## Block options
 
@@ -65,13 +65,13 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 ## Settings
 
-Global settings cover the username, movies shown per page, poster-collage or detailed-card display, Row/Grid layout, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
+Global settings cover the username, newest movies shown, poster-collage or detailed-card display, fitted-row/Grid layout, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
 
 The settings screen shows only the essentials by default: username, movies shown, display style, layout, and poster size. **Show advanced** reveals heading, spacing, radius, film information, refresh behavior, and cache tools without removing any features.
 
 **Poster collage** creates one image containing square-cornered inner posters, with the selected corner radius applied only to the outside of the complete collage. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
 
-Poster URLs are taken directly from the image in each Letterboxd RSS entry. That preserves whichever poster Letterboxd exposes in the feed, but the plugin cannot guarantee that a member's custom-poster choice is represented because Letterboxd does not document that RSS detail. The feed does not provide a separate official backdrop, and the plugin does not request one from TMDB because that would require a separately authenticated API integration.
+Poster URLs are taken directly from each Letterboxd RSS entry. The plugin has no custom-poster system and does not replace or download posters into the vault. The feed does not provide a separate official backdrop, and the plugin does not request one from TMDB.
 
 **Test feed** requests the configured public feed immediately. **Clear cache** removes all saved feed results.
 
@@ -89,7 +89,7 @@ The plugin requests `https://letterboxd.com/{username}/rss/` with Obsidian's sup
 
 The recommended **When a gallery is viewed** refresh policy checks the feed when you open/view a gallery and suppresses duplicate requests caused by quick Live Preview remounts. **After the cache interval** uses the selected freshness interval. **Manual only** uses the last saved result until you run **Refresh galleries**; it still makes an initial request when no saved result exists. None of these policies polls Letterboxd in the background.
 
-In strip layout, posters retain their selected pixel size. Scroll horizontally with a trackpad, the mouse wheel, or click-and-drag; the decorative scrollbar is hidden.
+In fitted-row layout, every selected poster remains visible on one line. The chosen poster size acts as a maximum and the row scales down when necessary.
 
 The gallery includes dedicated loading, empty, offline, missing-user, timeout, malformed-feed, and invalid-username states. Missing or failed posters use placeholders. Images are lazy-loaded and are never downloaded into the vault.
 

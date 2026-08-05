@@ -1,4 +1,3 @@
-import { setIcon } from 'obsidian';
 import { FeedCache, type CacheResult } from './cache';
 import { isValidUsername, resolveGalleryConfig } from './block-config';
 import {
@@ -8,7 +7,6 @@ import {
 } from './collage';
 import { CollageCache } from './collage-cache';
 import { balancedGridColumns, getCollageCell, responsiveGridColumns } from './collage-layout';
-import { clampPage, pageCount, pageItems } from './gallery-pagination';
 import { FeedError, fetchLetterboxdFeed } from './rss-client';
 import type { FilmEntry, GalleryConfig, PluginSettings } from './types';
 
@@ -203,64 +201,23 @@ function renderGallery(
 	}
 	const gallery = container.createDiv({ cls: 'lrf-gallery' });
 	if (config.layout === 'grid') {
+		gallery.style.setProperty('--lrf-grid-columns', String(columns));
 		gallery.style.setProperty(
 			'--lrf-gallery-width',
 			`${columns * config.posterSize + Math.max(0, columns - 1) * config.gap}px`,
 		);
+	} else {
+		gallery.style.setProperty('--lrf-strip-count', String(films.length));
+		gallery.style.setProperty(
+			'--lrf-gallery-width',
+			`${films.length * config.posterSize + Math.max(0, films.length - 1) * config.gap}px`,
+		);
 	}
 	for (const film of films) renderFilm(gallery, film, config);
-	enableStripScrolling(gallery);
 }
 
 function percentage(value: number, total: number): string {
 	return `${(value / total) * 100}%`;
-}
-
-function enableStripScrolling(scroll: HTMLElement): void {
-	const updateEdges = (): void => {
-		const overflow = scroll.scrollWidth - scroll.clientWidth > 2;
-		scroll.toggleClass('is-scrollable', overflow);
-		scroll.toggleClass('is-scroll-start', !overflow || scroll.scrollLeft <= 1);
-		scroll.toggleClass(
-			'is-scroll-end',
-			!overflow || scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 1,
-		);
-	};
-	updateEdges();
-	scroll.ownerDocument.defaultView?.requestAnimationFrame(updateEdges);
-	scroll.addEventListener('scroll', updateEdges, { passive: true });
-	scroll.addEventListener('pointerenter', updateEdges, { passive: true });
-	scroll.addEventListener('wheel', (event) => {
-		if (Math.abs(event.deltaY) <= Math.abs(event.deltaX) || scroll.scrollWidth <= scroll.clientWidth) return;
-		const atStart = scroll.scrollLeft <= 0 && event.deltaY < 0;
-		const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 1 && event.deltaY > 0;
-		if (atStart || atEnd) return;
-		event.preventDefault();
-		scroll.scrollLeft += event.deltaY;
-	}, { passive: false });
-	let startX = 0;
-	let startScroll = 0;
-	let dragging = false;
-	scroll.addEventListener('pointerdown', (event) => {
-		if (event.button !== 0 || scroll.scrollWidth <= scroll.clientWidth) return;
-		startX = event.clientX;
-		startScroll = scroll.scrollLeft;
-		dragging = false;
-		scroll.setPointerCapture(event.pointerId);
-	});
-	scroll.addEventListener('pointermove', (event) => {
-		if (!scroll.hasPointerCapture(event.pointerId)) return;
-		const distance = event.clientX - startX;
-		if (Math.abs(distance) > 4) dragging = true;
-		if (dragging) scroll.scrollLeft = startScroll - distance;
-	});
-	scroll.addEventListener('click', (event) => {
-		if (dragging) {
-			event.preventDefault();
-			event.stopPropagation();
-			dragging = false;
-		}
-	}, true);
 }
 
 function renderCollage(
@@ -309,16 +266,13 @@ function renderCollage(
 		link.style.setProperty('width', percentage(cell.width, asset.width));
 		link.style.setProperty('height', percentage(cell.height, asset.height));
 	}
-	enableStripScrolling(scroll);
 }
 
 export class GalleryView {
 	private run = 0;
 	private disposed = false;
-	private page = 0;
 	private lastResult: CacheResult | null = null;
 	private lastColumns = 0;
-	private paginationIdentity = '';
 	private resizeTimer: number | null = null;
 	private readonly resizeObserver: ResizeObserver | null;
 
@@ -338,9 +292,6 @@ export class GalleryView {
 	async refresh(force = false): Promise<void> {
 		const currentRun = ++this.run;
 		const config = resolveGalleryConfig(this.source, this.getSettings());
-		const paginationIdentity = `${config.username.toLowerCase()}\u0000${config.count}`;
-		if (this.paginationIdentity && this.paginationIdentity !== paginationIdentity) this.page = 0;
-		this.paginationIdentity = paginationIdentity;
 		if (!config.username) {
 			this.renderError(config, 'Add a Letterboxd username', 'Set a default username in plugin settings or add one to this block.');
 			return;
@@ -356,8 +307,7 @@ export class GalleryView {
 		if (saved && config.renderMode === 'collage' && saved.films.length > 0) {
 			const savedResult: CacheResult = { ...saved, source: 'cache' };
 			this.lastResult = savedResult;
-			this.page = clampPage(this.page, saved.films.length, config.count);
-			const films = pageItems(saved.films, this.page, config.count);
+			const films = saved.films.slice(0, config.count);
 			const columns = this.effectiveColumns(config, films.length);
 			this.lastColumns = columns;
 			const collageConfig = posterOnlyConfig(config);
@@ -383,13 +333,11 @@ export class GalleryView {
 			);
 			if (this.disposed || currentRun !== this.run) return;
 			this.lastResult = result;
-			this.page = clampPage(this.page, result.films.length, config.count);
-			const films = pageItems(result.films, this.page, config.count);
+			const films = result.films.slice(0, config.count);
 			const columns = this.effectiveColumns(config, films.length);
 			this.lastColumns = columns;
 			if (config.renderMode === 'gallery' || films.length === 0) {
 				renderGallery(this.container, result, config, films, columns);
-				this.addPaginationControls(config, result.films.length);
 			} else {
 				const collageConfig = posterOnlyConfig(config);
 				const key = collageCacheKey(films, collageConfig, columns, this.container.ownerDocument);
@@ -429,7 +377,7 @@ export class GalleryView {
 		if (this.disposed || !this.lastResult) return;
 		const config = resolveGalleryConfig(this.source, this.getSettings());
 		if (config.layout !== 'grid') return;
-		const films = pageItems(this.lastResult.films, this.page, config.count);
+		const films = this.lastResult.films.slice(0, config.count);
 		const columns = this.effectiveColumns(config, films.length);
 		if (columns === this.lastColumns) return;
 		const window = this.container.ownerDocument.defaultView;
@@ -449,78 +397,6 @@ export class GalleryView {
 	): void {
 		const url = this.runtime.collages.objectUrl(key, this.container.ownerDocument);
 		renderCollage(this.container, result, config, films, asset, url);
-		this.addPaginationControls(config, result.films.length);
-	}
-
-	private addPaginationControls(config: GalleryConfig, totalFilms: number): void {
-		const lastPage = pageCount(totalFilms, config.count) - 1;
-		if (lastPage === 0) return;
-		const navigation = this.container.createDiv({ cls: 'lrf-page-navigation' });
-		this.addPaginationButton(navigation, 'previous', config.count, totalFilms, this.page === 0);
-		navigation.createDiv({
-			cls: 'lrf-page-status',
-			text: `${this.page + 1} / ${lastPage + 1}`,
-			attr: { 'aria-live': 'polite' },
-		});
-		this.addPaginationButton(navigation, 'next', config.count, totalFilms, this.page === lastPage);
-	}
-
-	private addPaginationButton(
-		parent: HTMLElement,
-		direction: 'previous' | 'next',
-		pageSize: number,
-		totalFilms: number,
-		disabled: boolean,
-	): void {
-		const targetPage = this.page + (direction === 'previous' ? -1 : 1);
-		const firstFilm = targetPage * pageSize + 1;
-		const lastFilm = Math.min(totalFilms, firstFilm + pageSize - 1);
-		const directionLabel = direction === 'previous' ? 'newer' : 'older';
-		const button = parent.createEl('button', {
-			cls: `lrf-page-button lrf-page-${direction}`,
-			attr: {
-				type: 'button',
-				'aria-label': disabled
-					? `No ${directionLabel} movies`
-					: `Show ${directionLabel} movies ${firstFilm}–${lastFilm}`,
-			},
-		});
-		setIcon(button, direction === 'previous' ? 'chevron-left' : 'chevron-right');
-		button.disabled = disabled;
-		button.addEventListener('click', (event) => {
-			event.preventDefault();
-			event.stopPropagation();
-			void this.changePage(direction === 'previous' ? -1 : 1);
-		});
-	}
-
-	private async changePage(delta: number): Promise<void> {
-		const result = this.lastResult;
-		if (!result) return;
-		const config = resolveGalleryConfig(this.source, this.getSettings());
-		const lastPage = pageCount(result.films.length, config.count) - 1;
-		const nextPage = Math.max(0, Math.min(lastPage, this.page + delta));
-		if (nextPage === this.page) return;
-		this.page = nextPage;
-		const currentRun = ++this.run;
-		const films = pageItems(result.films, this.page, config.count);
-		const columns = this.effectiveColumns(config, films.length);
-		this.lastColumns = columns;
-		if (config.renderMode === 'gallery' || films.length === 0) {
-			renderGallery(this.container, result, config, films, columns);
-			this.addPaginationControls(config, result.films.length);
-			this.notifyLayout();
-			return;
-		}
-		const collageConfig = posterOnlyConfig(config);
-		const key = collageCacheKey(films, collageConfig, columns, this.container.ownerDocument);
-		const asset = await this.runtime.collages.get(
-			key,
-			() => createPosterCollage(films, collageConfig, this.container.ownerDocument, columns),
-		);
-		if (this.disposed || currentRun !== this.run) return;
-		this.showCollage(result, config, films, key, asset);
-		this.notifyLayout();
 	}
 
 	private renderError(config: GalleryConfig, title: string, detail: string): void {
