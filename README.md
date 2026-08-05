@@ -36,7 +36,7 @@ The block renders in both Live Preview and Reading view. Switch to Source mode t
 
 When the RSS feed contains more entries than `count`, minimal previous/next arrows appear while the gallery is hovered or keyboard-focused. Each step shows the next `count` films and continues until the saved feed has no older entries. The arrows remain visible on touch devices.
 
-Both display styles support a horizontally scrolling **Row** and a responsive **Grid**. Detailed-card mode gives titles and metadata room to wrap. Poster collages remain poster-only; hovering or keyboard-focusing a poster shows one Obsidian tooltip with its enabled information fields. Grid collages grow posters to use available width, cap them at 220 pixels, and center incomplete final rows. A one-film collage is a centered poster rather than a simulated backdrop.
+Both display styles support a horizontally scrolling **Row** and a height-controlled **Grid**. Choose one to four poster rows; films fill across those rows and continue horizontally rather than creating a tall stack or shrinking the posters. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image. Poster collages remain poster-only; hovering or keyboard-focusing a poster shows one Obsidian tooltip with its enabled information fields. A one-film collage is a centered poster rather than a simulated backdrop.
 
 Use the **Poster size** slider in plugin settings to scale poster width and height proportionally. The default is a compact `120 px`.
 
@@ -50,7 +50,7 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | `count` | `1`–`20` |
 | `layout` | `strip` or `grid` |
 | `render-mode` | `collage` for poster-only output or `gallery` for detailed cards |
-| `grid-columns` | `2`–`6` |
+| `grid-rows` | `1`–`4` poster rows |
 | `gap` | `0`, `2`, `4`, or `8` pixels |
 | `heading` | Plain text, up to 120 characters |
 | `show-heading` | `true` or `false` |
@@ -66,7 +66,7 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 
 ## Settings
 
-Global settings cover the username, films per page, poster-collage or detailed-card display, Row/Grid layout, responsive column maximum, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout.
+Global settings cover the username, films per page, poster-collage or detailed-card display, Row/Grid layout, collage height, poster gap, heading, film-information fields, poster size, corner radius, refresh policy, cache interval, and request timeout. Saved changes refresh open galleries immediately.
 
 **Poster collage** creates one image containing square-cornered inner posters, with the selected corner radius applied only to the outside of the complete collage. Selected film information is available in a single Obsidian tooltip on hover or keyboard focus. **Detailed cards** uses separate poster elements with readable titles and the selected year, rating, and watched-date fields.
 

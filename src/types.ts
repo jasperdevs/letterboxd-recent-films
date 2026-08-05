@@ -21,7 +21,7 @@ export interface PluginSettings {
 	layout: GalleryLayout;
 	renderMode: RenderMode;
 	informationStyle: InformationStyle;
-	gridColumns: number;
+	gridRows: number;
 	gap: number;
 	heading: string;
 	showHeading: boolean;
@@ -60,7 +60,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	layout: 'grid',
 	renderMode: 'collage',
 	informationStyle: 'none',
-	gridColumns: 6,
+	gridRows: 2,
 	gap: 2,
 	heading: 'Recently watched',
 	showHeading: false,

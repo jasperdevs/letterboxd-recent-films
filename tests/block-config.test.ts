@@ -29,7 +29,7 @@ describe('block parsing', () => {
 			'layout: grid',
 			'render-mode: gallery',
 			'information-style: hover',
-			'grid-columns: 5',
+			'grid-rows: 3',
 			'gap: 4',
 			'heading: Diary: this week',
 			'show-captions: true',
@@ -47,7 +47,7 @@ describe('block parsing', () => {
 			layout: 'grid',
 			renderMode: 'gallery',
 			informationStyle: 'hover',
-			gridColumns: 5,
+			gridRows: 3,
 			gap: 4,
 			heading: 'Diary: this week',
 			showCaptions: true,
@@ -79,9 +79,9 @@ describe('block parsing', () => {
 
 describe('settings normalization', () => {
 	it('restores safe defaults for invalid persisted values', () => {
-		const normalized = normalizeSettings({ count: 0, gridColumns: 50, layout: 'other', posterSize: 133 });
+		const normalized = normalizeSettings({ count: 0, gridRows: 50, layout: 'other', posterSize: 133 });
 		expect(normalized.count).toBe(DEFAULT_SETTINGS.count);
-		expect(normalized.gridColumns).toBe(DEFAULT_SETTINGS.gridColumns);
+		expect(normalized.gridRows).toBe(DEFAULT_SETTINGS.gridRows);
 		expect(normalized.layout).toBe(DEFAULT_SETTINGS.layout);
 		expect(normalized.posterSize).toBe(DEFAULT_SETTINGS.posterSize);
 	});

@@ -38,7 +38,7 @@ export function getCollageLayout(
 	filmCount: number,
 	config: GalleryConfig,
 	columnOverride?: number,
-	availableWidth?: number,
+	_availableWidth?: number,
 ): CollageLayout {
 	const safeCount = Math.max(1, filmCount);
 	if (safeCount === 1 && config.count === 1) {
@@ -59,12 +59,9 @@ export function getCollageLayout(
 	}
 	const columns = config.layout === 'strip'
 		? safeCount
-		: Math.min(columnOverride ?? config.gridColumns, safeCount);
+		: Math.min(columnOverride ?? Math.ceil(safeCount / config.gridRows), safeCount);
 	const rows = Math.ceil(safeCount / columns);
-	const fittedPosterWidth = availableWidth === undefined || config.layout === 'strip'
-		? config.posterSize
-		: Math.floor((availableWidth - Math.max(0, columns - 1) * config.gap) / columns);
-	const posterWidth = Math.min(220, Math.max(config.posterSize, fittedPosterWidth));
+	const posterWidth = config.posterSize;
 	const posterHeight = Math.round(posterWidth * POSTER_ASPECT_RATIO);
 	const captionsEnabled = config.informationStyle === 'captions';
 	const captionLines = captionsEnabled

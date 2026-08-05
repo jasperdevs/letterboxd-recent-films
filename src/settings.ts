@@ -78,13 +78,13 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 				}));
 
 		if (this.plugin.settings.layout === 'grid') new Setting(containerEl)
-			.setName('Grid columns')
-			.setDesc('Maximum number of posters or cards in each row. Narrow notes use fewer automatically.')
+			.setName('Grid height')
+			.setDesc('Number of poster rows. Extra films continue to the right instead of making the gallery taller.')
 			.addSlider((slider) => slider
-				.setLimits(2, 6, 1)
-				.setValue(this.plugin.settings.gridColumns)
+				.setLimits(1, 4, 1)
+				.setValue(this.plugin.settings.gridRows)
 				.onChange(async (value) => {
-					this.plugin.settings.gridColumns = value;
+					this.plugin.settings.gridRows = value;
 					await this.plugin.saveSettings();
 				}));
 

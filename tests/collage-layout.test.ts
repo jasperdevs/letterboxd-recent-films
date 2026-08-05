@@ -37,35 +37,35 @@ describe('poster collage layout', () => {
 
 	it('centers incomplete final rows instead of leaving an orphan on the left', () => {
 		const layout = getCollageLayout(5, { ...DEFAULT_SETTINGS, gap: 4 }, 3);
-		expect(getCollageCell(layout, 3, 5).x).toBe(72);
-		expect(getCollageCell(layout, 4, 5).x).toBe(216);
+		expect(getCollageCell(layout, 3, 5).x).toBe(62);
+		expect(getCollageCell(layout, 4, 5).x).toBe(186);
 	});
 
-	it('grows grid posters to use available width without exceeding the size limit', () => {
+	it('keeps grid posters at the selected size instead of stretching them', () => {
 		const layout = getCollageLayout(4, { ...DEFAULT_SETTINGS, gap: 4 }, 4, 700);
-		expect(layout.posterWidth).toBe(172);
-		expect(layout.width).toBe(700);
+		expect(layout.posterWidth).toBe(120);
+		expect(layout.width).toBe(492);
 		const pair = getCollageLayout(2, { ...DEFAULT_SETTINGS, gap: 4 }, 2, 700);
-		expect(pair.posterWidth).toBe(220);
-		expect(pair.width).toBe(444);
+		expect(pair.posterWidth).toBe(120);
+		expect(pair.width).toBe(244);
 	});
 
 	it('wraps a grid into rows and reserves image space for optional information', () => {
 		const layout = getCollageLayout(6, {
 			...DEFAULT_SETTINGS,
 			layout: 'grid',
-			gridColumns: 4,
+			gridRows: 2,
 			posterSize: 140,
 			informationStyle: 'captions',
 			showCaptions: true,
 			showRating: true,
 		});
 		expect(layout).toMatchObject({
-			columns: 4,
+			columns: 3,
 			rows: 2,
 			captionHeight: 88,
 			cellHeight: 298,
-			width: 566,
+			width: 424,
 			height: 598,
 			gap: 2,
 		});

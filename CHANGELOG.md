@@ -33,6 +33,10 @@ All notable changes to this project will be documented in this file.
 - Remove the poster-derived fake backdrop from one-film layouts.
 - Keep one-film pages at the same selected poster size as every other page.
 - Use one native Obsidian tooltip per collage poster instead of stacked custom and native tooltips.
+- Replace the ineffective grid-column control with a one-to-four-row collage-height setting.
+- Keep grid posters at their selected size and scroll horizontally instead of shrinking or forming a very tall stack.
+- Remove dark card backgrounds from detailed mode and let titles, ratings, years, and dates wrap without clipping.
+- Use Obsidian theme variables for navigation controls in both light and dark themes.
 
 ## 1.0.0 - 2026-08-05
 
