@@ -34,7 +34,7 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-The `count` option is final: choose `1`–`100`, or `max` for every entry returned by the RSS feed. The gallery does not add pagination or hidden older pages.
+The `count` option is final: choose `1`–`20`, or `max` for every entry returned by the RSS feed. The gallery does not add pagination or hidden older pages.
 
 The collage chooses its own balanced grid. One or two posters stay compact, ordinary sets use a readable row or grid, and large feeds add rows instead of shrinking every poster into a thumbnail.
 
@@ -47,7 +47,7 @@ Block values override global settings. Invalid or unknown values are ignored, ex
 | Option | Values |
 | --- | --- |
 | `username` | A valid public Letterboxd username |
-| `count` | `1`–`100`, or `max` |
+| `count` | `1`–`20`, or `max` |
 | `gap` | `0`, `2`, `4`, or `8` pixels |
 | `gallery-width` | `10`–`100` in increments of `5` |
 | `auto-size` | `true` or `false` |

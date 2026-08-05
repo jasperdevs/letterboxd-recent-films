@@ -61,14 +61,14 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Movies shown')
-			.setDesc('Choose up to 100 recent entries, or max for everything returned by the RSS feed.')
+			.setDesc('Choose 1–20 recent entries, or max for everything returned by the RSS feed.')
 			.addSlider((slider) => slider
-				.setLimits(1, 101, 1)
-				.setValue(this.plugin.settings.count === 0 ? 101 : this.plugin.settings.count)
+				.setLimits(1, 21, 1)
+				.setValue(this.plugin.settings.count === 0 ? 21 : this.plugin.settings.count)
 				.setInstant(false)
-				.setDisplayFormat((value) => value === 101 ? 'Max' : String(value))
+				.setDisplayFormat((value) => value === 21 ? 'Max' : String(value))
 				.onChange(async (value) => {
-					this.plugin.settings.count = value === 101 ? 0 : value;
+					this.plugin.settings.count = value === 21 ? 0 : value;
 					await this.plugin.saveSettings();
 				}));
 

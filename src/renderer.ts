@@ -151,9 +151,8 @@ function renderCollage(
 	const scroll = container.createDiv({ cls: 'lrf-collage-scroll' });
 	const wrapper = scroll.createDiv({ cls: 'lrf-collage-wrap' });
 	const naturalWidth = asset.columns * 132 + Math.max(0, asset.columns - 1) * config.gap;
-	wrapper.style.setProperty('width', config.autoSize
-		? `min(100%, ${naturalWidth}px)`
-		: `${config.galleryWidth}%`);
+	wrapper.style.setProperty('width', config.autoSize ? '100%' : `${config.galleryWidth}%`);
+	wrapper.style.setProperty('max-width', config.autoSize ? `${naturalWidth}px` : '100%');
 	wrapper.createEl('img', {
 		cls: 'lrf-collage-image',
 		attr: {
@@ -196,6 +195,8 @@ function addResizeHandle(
 	let startX = 0;
 	let startY = 0;
 	let startWidth = 0;
+	let startInlineWidth = '';
+	let startMaxWidth = '';
 	let aspectRatio = 1;
 	let currentPercent = configuredWidth;
 	let moved = false;
@@ -234,6 +235,8 @@ function addResizeHandle(
 			startX = event.clientX;
 			startY = event.clientY;
 			startWidth = rectangle.width;
+			startInlineWidth = wrapper.style.width;
+			startMaxWidth = wrapper.style.maxWidth;
 			aspectRatio = rectangle.height > 0 ? rectangle.width / rectangle.height : 1;
 			handle.setPointerCapture(event.pointerId);
 			currentPercent = Math.round(Math.max(10, Math.min(100, rectangle.width / Math.max(1, host.clientWidth) * 100)));
@@ -249,6 +252,7 @@ function addResizeHandle(
 				(Math.abs(horizontal) >= Math.abs(vertical) ? horizontal : vertical);
 			if (Math.abs(delta) < 2) return;
 			moved = true;
+			wrapper.style.removeProperty('max-width');
 			updateWidth(startWidth + delta);
 		});
 		const finishResize = (event: PointerEvent): void => {
@@ -262,6 +266,8 @@ function addResizeHandle(
 			if (!handle.hasPointerCapture(event.pointerId)) return;
 			handle.releasePointerCapture(event.pointerId);
 			wrapper.removeClass('is-resizing');
+			wrapper.style.setProperty('width', startInlineWidth);
+			wrapper.style.setProperty('max-width', startMaxWidth);
 		});
 		handle.addEventListener('dblclick', (event) => {
 			event.preventDefault();
@@ -273,6 +279,7 @@ function addResizeHandle(
 			event.preventDefault();
 			const change = event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -5 : 5;
 			currentPercent = Math.max(10, Math.min(100, currentPercent + change));
+			wrapper.style.removeProperty('max-width');
 			wrapper.style.setProperty('width', `${currentPercent}%`);
 			for (const item of handles) item.setAttr('aria-valuenow', String(currentPercent));
 			void onResize(currentPercent);

@@ -16,12 +16,13 @@ All notable changes to this project will be documented in this file.
 - Remove detailed-poster mode and its display selector in favor of one poster collage with optional heading and tooltip details.
 - Replace ineffective per-poster sizing with a left-aligned gallery-width control and clip the outer collage radius reliably.
 - Add automatic sparse/dense sizing plus keyboard-, pointer-, and touch-accessible resize handles with a 10%–100% manual range.
-- Extend Movies shown to 100 entries and a Max option that uses every RSS entry returned.
+- Keep Movies shown concise at 1–20 entries plus a Max option that uses every RSS entry returned.
 - Make complete film information the default hover behavior and use the existing field toggles only for captions below posters.
 - Remove manual layout selection in favor of one automatically balanced responsive grid.
 - Keep high-resolution caption text readable at every displayed collage size.
 - Prevent clicks and cancelled gestures from accidentally changing manual gallery width.
 - Make a block-level gallery width select manual sizing unless automatic sizing is explicitly requested.
+- Enforce automatic sparse-gallery width with an explicit maximum so one or two posters cannot expand to the note width.
 
 ## 1.0.1 - 2026-08-05
 

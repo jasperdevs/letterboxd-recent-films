@@ -18,10 +18,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function finiteInteger(value: unknown, fallback: number, min: number, max: number): number {
-	return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max
-		? value
-		: fallback;
+function countValue(value: unknown): number {
+	if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) return DEFAULT_SETTINGS.count;
+	if (value === 0) return 0;
+	return Math.min(value, 20);
 }
 
 function allowedNumber(
@@ -48,7 +48,7 @@ export function normalizeSettings(value: unknown): PluginSettings {
 	const input = isRecord(value) ? value : {};
 	return {
 		username: stringValue(input.username, DEFAULT_SETTINGS.username, 15).trim(),
-		count: finiteInteger(input.count, DEFAULT_SETTINGS.count, 0, 100),
+		count: countValue(input.count),
 		gap: allowedNumber(input.gap, DEFAULT_SETTINGS.gap, GAPS),
 		heading: stringValue(input.heading, DEFAULT_SETTINGS.heading, 120),
 		showHeading: booleanValue(input.showHeading, DEFAULT_SETTINGS.showHeading),
@@ -109,7 +109,7 @@ export function parseBlockConfig(source: string): BlockOverrides {
 					overrides.count = 0;
 					break;
 				}
-				const parsed = parseInteger(value, 1, 100);
+				const parsed = parseInteger(value, 1, 20);
 				if (parsed !== undefined) overrides.count = parsed;
 				break;
 			}

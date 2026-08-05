@@ -52,6 +52,7 @@ body.theme-light .lrf-skeleton {
 
 .lrf-collage-wrap {
 	border-radius: var(--lrf-radius);
+	box-sizing: border-box;
 	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 	display: block;
 	margin-inline: 0;

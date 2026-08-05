@@ -57,7 +57,7 @@ describe('block parsing', () => {
 	});
 
 	it('ignores invalid typed values', () => {
-		expect(parseBlockConfig('count: 101\nshow-date: sometimes\ngallery-width: 73\ntimeout: 17')).toEqual({});
+		expect(parseBlockConfig('count: 21\nshow-date: sometimes\ngallery-width: 73\ntimeout: 17')).toEqual({});
 		expect(parseBlockConfig('count: max')).toEqual({ count: 0 });
 	});
 
@@ -82,6 +82,10 @@ describe('settings normalization', () => {
 		const normalized = normalizeSettings({ count: -1, galleryWidth: 73 });
 		expect(normalized.count).toBe(DEFAULT_SETTINGS.count);
 		expect(normalized.galleryWidth).toBe(DEFAULT_SETTINGS.galleryWidth);
+	});
+
+	it('migrates old counts above 20 to the new visible maximum', () => {
+		expect(normalizeSettings({ count: 100 }).count).toBe(20);
 	});
 
 	it('ignores removed detailed-poster settings', () => {
