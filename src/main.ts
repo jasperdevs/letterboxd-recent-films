@@ -41,6 +41,7 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 	private readonly runtime = new GalleryRuntime();
 	private readonly galleries = new Set<GalleryView>();
 	private saveChain: Promise<void> = Promise.resolve();
+	private settingsRevision = 0;
 
 	async onload(): Promise<void> {
 		const loaded: unknown = await this.loadData();
@@ -114,8 +115,10 @@ export default class LetterboxdRecentFilmsPlugin extends Plugin {
 	}
 
 	async saveSettings(): Promise<void> {
+		const revision = ++this.settingsRevision;
 		this.settings = normalizeSettings(this.settings);
 		await this.persistData();
+		if (revision !== this.settingsRevision) return;
 		await this.refreshGalleries(false);
 	}
 

@@ -59,7 +59,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	layout: 'grid',
 	renderMode: 'collage',
 	informationStyle: 'none',
-	gap: 2,
+	gap: 4,
 	heading: 'Recently watched',
 	showHeading: false,
 	showCaptions: false,

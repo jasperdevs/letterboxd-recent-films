@@ -1,7 +1,7 @@
 .lrf-root {
 	--lrf-poster-width: 120px;
 	--lrf-radius: 6px;
-	--lrf-gap: 2px;
+	--lrf-gap: 4px;
 	box-sizing: border-box;
 	color: var(--text-normal);
 	margin-block: var(--size-4-4);
@@ -219,30 +219,49 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-page-navigation {
-	align-items: center;
-	display: flex;
-	gap: 10px;
-	justify-content: space-between;
-	margin-top: var(--size-4-3);
+	inset: 0;
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+	transition: opacity 120ms ease;
+	z-index: 4;
+}
+
+.lrf-root:hover .lrf-page-navigation,
+.lrf-root:focus-within .lrf-page-navigation {
+	opacity: 1;
 }
 
 .lrf-page-button {
 	align-items: center;
 	background: var(--background-primary-alt);
-	border: 0;
+	border: 1px solid var(--background-modifier-border);
 	border-radius: 999px;
-	box-shadow: 0 0 0 1px var(--background-modifier-border), 0 2px 10px rgba(0, 0, 0, 0.16);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 	color: var(--text-normal);
 	cursor: pointer;
 	display: flex;
 	font-family: var(--font-interface);
-	font-size: var(--font-ui-small);
-	font-weight: var(--font-medium);
-	height: 40px;
+	font-size: 25px;
+	font-weight: 400;
+	height: 34px;
 	justify-content: center;
-	min-width: 90px;
-	padding: 0 12px;
+	min-width: 34px;
+	padding: 0 0 2px;
+	pointer-events: auto;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
 	transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease;
+	width: 34px;
+}
+
+.lrf-page-previous {
+	left: 8px;
+}
+
+.lrf-page-next {
+	right: 8px;
 }
 
 .lrf-root .lrf-page-button:disabled {
@@ -254,7 +273,7 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-page-button:active {
-	transform: scale(0.96);
+	transform: translateY(-50%) scale(0.94);
 }
 
 .lrf-page-button:focus-visible {
@@ -263,11 +282,21 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-page-status {
+	background: var(--background-primary-alt);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 999px;
+	bottom: 8px;
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	font-variant-numeric: tabular-nums;
-	min-width: 42px;
+	left: 50%;
+	line-height: 24px;
+	min-width: 44px;
+	padding-inline: 8px;
+	pointer-events: none;
+	position: absolute;
 	text-align: center;
+	transform: translateX(-50%);
 }
 
 .lrf-caption {
@@ -353,6 +382,12 @@ body.theme-light .lrf-collage-image {
 
 	.lrf-page-navigation {
 		transition: none;
+	}
+}
+
+@media (hover: none) {
+	.lrf-page-navigation {
+		opacity: 1;
 	}
 }
 

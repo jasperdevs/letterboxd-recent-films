@@ -303,6 +303,7 @@ export class GalleryView {
 	private page = 0;
 	private lastResult: CacheResult | null = null;
 	private lastColumns = 0;
+	private paginationIdentity = '';
 	private resizeTimer: number | null = null;
 	private readonly resizeObserver: ResizeObserver | null;
 
@@ -322,6 +323,9 @@ export class GalleryView {
 	async refresh(force = false): Promise<void> {
 		const currentRun = ++this.run;
 		const config = resolveGalleryConfig(this.source, this.getSettings());
+		const paginationIdentity = `${config.username.toLowerCase()}\u0000${config.count}`;
+		if (this.paginationIdentity && this.paginationIdentity !== paginationIdentity) this.page = 0;
+		this.paginationIdentity = paginationIdentity;
 		if (!config.username) {
 			this.renderError(config, 'Add a Letterboxd username', 'Set a default username in plugin settings or add one to this block.');
 			return;
@@ -434,27 +438,34 @@ export class GalleryView {
 		const lastPage = pageCount(totalFilms, config.count) - 1;
 		if (lastPage === 0) return;
 		const navigation = this.container.createDiv({ cls: 'lrf-page-navigation' });
-		this.addPaginationButton(navigation, 'previous', config.count, this.page === 0);
+		this.addPaginationButton(navigation, 'previous', config.count, totalFilms, this.page === 0);
 		navigation.createDiv({
 			cls: 'lrf-page-status',
 			text: `${this.page + 1} / ${lastPage + 1}`,
 			attr: { 'aria-live': 'polite' },
 		});
-		this.addPaginationButton(navigation, 'next', config.count, this.page === lastPage);
+		this.addPaginationButton(navigation, 'next', config.count, totalFilms, this.page === lastPage);
 	}
 
 	private addPaginationButton(
 		parent: HTMLElement,
 		direction: 'previous' | 'next',
 		pageSize: number,
+		totalFilms: number,
 		disabled: boolean,
 	): void {
+		const targetPage = this.page + (direction === 'previous' ? -1 : 1);
+		const firstFilm = targetPage * pageSize + 1;
+		const lastFilm = Math.min(totalFilms, firstFilm + pageSize - 1);
+		const directionLabel = direction === 'previous' ? 'newer' : 'older';
 		const button = parent.createEl('button', {
 			cls: `lrf-page-button lrf-page-${direction}`,
-			text: direction === 'previous' ? '← Newer' : 'Older →',
+			text: direction === 'previous' ? '‹' : '›',
 			attr: {
 				type: 'button',
-				'aria-label': `${direction === 'previous' ? 'Previous' : 'Next'} ${pageSize} films`,
+				'aria-label': disabled
+					? `No ${directionLabel} movies`
+					: `Show ${directionLabel} movies ${firstFilm}–${lastFilm}`,
 			},
 		});
 		button.disabled = disabled;

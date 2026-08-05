@@ -23,7 +23,7 @@ username: movie_fan
 count: 6
 layout: grid
 information-style: none
-gap: 2
+gap: 4
 heading: Recently watched
 show-captions: false
 show-rating: false
@@ -34,11 +34,11 @@ show-date: false
 Posters open the matching Letterboxd diary entry in a new window or browser tab.
 The block renders in both Live Preview and Reading view. Switch to Source mode temporarily when you want to edit the raw block configuration.
 
-When the RSS feed contains more entries than `count`, clearly labeled **Newer** and **Older** controls appear below the gallery. Each page contains exactly `count` films in RSS order, so navigation never hides or reorders entries within a page.
+When the RSS feed contains more entries than `count`, compact previous and next arrows appear when the gallery is hovered or focused (and remain visible on touch devices). Each page contains exactly `count` films in RSS order. Changing the count returns to the newest page.
 
-Both display styles support a **Grid** and a **Scrolling row**. Grid is recommended: it measures the note, keeps posters at the selected size, fills strictly in RSS order, and uses one simple adjustment to avoid a single-poster final row. Scrolling row keeps every poster on one horizontal line and supports the wheel, trackpad, or drag. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
+Both display styles support a **Grid** and a **Scrolling row**. Grid is recommended: it measures the note, keeps posters at the selected size, fills strictly in RSS order, and balances the available rows without hiding entries. Scrolling row keeps every poster on one horizontal line and supports the wheel, trackpad, or drag. Detailed mode uses transparent poster items whose title and metadata wrap beneath each image.
 
-Use the **Poster size** slider in plugin settings to scale poster width and height proportionally. The default is a compact `120 px`.
+Use the **Poster size** menu in plugin settings to scale poster width and height proportionally. The recommended default is `120 px`.
 
 ## Block options
 

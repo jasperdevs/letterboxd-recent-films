@@ -3,6 +3,7 @@ import { isValidUsername } from './block-config';
 import {
 	CORNER_RADII,
 	GAPS,
+	POSTER_SIZES,
 	REFRESH_INTERVALS,
 	TIMEOUT_SECONDS,
 } from './types';
@@ -13,6 +14,20 @@ function minuteLabel(minutes: number): string {
 	if (minutes === 60) return '1 hour';
 	if (minutes < 1440) return `${minutes / 60} hours`;
 	return '24 hours';
+}
+
+function posterSizeLabel(size: number): string {
+	const labels: Record<number, string> = {
+		80: 'Tiny',
+		100: 'Compact',
+		120: 'Comfortable (recommended)',
+		140: 'Medium',
+		160: 'Large',
+		180: 'Extra large',
+		200: 'Very large',
+		220: 'Maximum',
+	};
+	return `${labels[size] ?? `${size} px`} · ${size} px`;
 }
 
 export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
@@ -61,14 +76,17 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Movies shown')
-			.setDesc('Exact number displayed on each page (1–20). Older entries remain available with navigation.')
-			.addSlider((slider) => slider
-				.setLimits(1, 20, 1)
-				.setValue(this.plugin.settings.count)
-				.onChange(async (value) => {
-					this.plugin.settings.count = value;
+			.setDesc('How many recent movies appear at once. Hover the gallery arrows to continue through the feed.')
+			.addDropdown((dropdown) => {
+				for (let count = 1; count <= 20; count += 1) {
+					dropdown.addOption(String(count), `${count} ${count === 1 ? 'movie' : 'movies'}`);
+				}
+				dropdown.setValue(String(this.plugin.settings.count));
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.count = Number.parseInt(value, 10);
 					await this.plugin.saveSettings();
-				}));
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Layout')
@@ -101,14 +119,15 @@ export class LetterboxdRecentFilmsSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Poster size')
-			.setDesc('Poster width from compact to large. Height adjusts proportionally.')
-			.addSlider((slider) => slider
-				.setLimits(80, 220, 20)
-				.setValue(this.plugin.settings.posterSize)
-				.onChange(async (value) => {
-					this.plugin.settings.posterSize = value;
+			.setDesc('Choose a consistent poster width. Comfortable fits most notes without crowding.')
+			.addDropdown((dropdown) => {
+				for (const size of POSTER_SIZES) dropdown.addOption(String(size), posterSizeLabel(size));
+				dropdown.setValue(String(this.plugin.settings.posterSize));
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.posterSize = Number.parseInt(value, 10);
 					await this.plugin.saveSettings();
-				}));
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Advanced settings')

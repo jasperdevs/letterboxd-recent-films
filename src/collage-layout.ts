@@ -36,9 +36,9 @@ export function responsiveGridColumns(
 
 export function balancedGridColumns(filmCount: number, maximum: number): number {
 	const safeCount = Math.max(1, filmCount);
-	const columns = Math.max(1, Math.min(maximum, safeCount));
-	if (safeCount > columns && safeCount % columns === 1 && columns > 2) return columns - 1;
-	return columns;
+	const maxColumns = Math.max(1, Math.min(maximum, safeCount));
+	const fewestRows = Math.ceil(safeCount / maxColumns);
+	return Math.ceil(safeCount / fewestRows);
 }
 
 export function getCollageLayout(

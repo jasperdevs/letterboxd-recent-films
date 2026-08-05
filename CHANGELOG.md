@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Reset navigation to the newest page when the username or movies-per-page value changes.
+- Ignore superseded setting refreshes so rapid changes cannot restore an outdated collage.
+- Balance responsive grids evenly and restore compact hover/focus navigation controls.
+- Replace the count and poster-size sliders with explicit menus and use a comfortable default gap.
+
 ## 1.0.1 - 2026-08-05
 
 ### Changed
