@@ -1,3 +1,4 @@
+import { setIcon } from 'obsidian';
 import { FeedCache, type CacheResult } from './cache';
 import { isValidUsername, resolveGalleryConfig } from './block-config';
 import {
@@ -216,6 +217,19 @@ function percentage(value: number, total: number): string {
 }
 
 function enableStripScrolling(scroll: HTMLElement): void {
+	const updateEdges = (): void => {
+		const overflow = scroll.scrollWidth - scroll.clientWidth > 2;
+		scroll.toggleClass('is-scrollable', overflow);
+		scroll.toggleClass('is-scroll-start', !overflow || scroll.scrollLeft <= 1);
+		scroll.toggleClass(
+			'is-scroll-end',
+			!overflow || scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 1,
+		);
+	};
+	updateEdges();
+	scroll.ownerDocument.defaultView?.requestAnimationFrame(updateEdges);
+	scroll.addEventListener('scroll', updateEdges, { passive: true });
+	scroll.addEventListener('pointerenter', updateEdges, { passive: true });
 	scroll.addEventListener('wheel', (event) => {
 		if (Math.abs(event.deltaY) <= Math.abs(event.deltaX) || scroll.scrollWidth <= scroll.clientWidth) return;
 		const atStart = scroll.scrollLeft <= 0 && event.deltaY < 0;
@@ -264,6 +278,7 @@ function renderCollage(
 	addCacheStatus(container, result);
 	const scroll = container.createDiv({ cls: 'lrf-collage-scroll' });
 	const wrapper = scroll.createDiv({ cls: 'lrf-collage-wrap' });
+	wrapper.style.setProperty('width', `${asset.width}px`);
 	wrapper.createEl('img', {
 		cls: 'lrf-collage-image',
 		attr: {
@@ -402,7 +417,10 @@ export class GalleryView {
 
 	private effectiveColumns(config: GalleryConfig, filmCount: number): number {
 		if (config.layout === 'strip') return Math.max(1, filmCount);
-		const availableWidth = this.container.clientWidth || this.container.parentElement?.clientWidth || 700;
+		const containerWidth = this.container.clientWidth || this.container.getBoundingClientRect().width;
+		const parentWidth = this.container.parentElement?.clientWidth ?? 0;
+		const viewportWidth = this.container.ownerDocument.documentElement.clientWidth;
+		const availableWidth = containerWidth || parentWidth || Math.min(600, Math.max(280, viewportWidth - 48));
 		const maximum = responsiveGridColumns(availableWidth, 6, config.posterSize, config.gap);
 		return balancedGridColumns(filmCount, maximum);
 	}
@@ -460,7 +478,6 @@ export class GalleryView {
 		const directionLabel = direction === 'previous' ? 'newer' : 'older';
 		const button = parent.createEl('button', {
 			cls: `lrf-page-button lrf-page-${direction}`,
-			text: direction === 'previous' ? '‹' : '›',
 			attr: {
 				type: 'button',
 				'aria-label': disabled
@@ -468,6 +485,7 @@ export class GalleryView {
 					: `Show ${directionLabel} movies ${firstFilm}–${lastFilm}`,
 			},
 		});
+		setIcon(button, direction === 'previous' ? 'chevron-left' : 'chevron-right');
 		button.disabled = disabled;
 		button.addEventListener('click', (event) => {
 			event.preventDefault();

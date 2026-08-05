@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 - Ignore superseded setting refreshes so rapid changes cannot restore an outdated collage.
 - Balance responsive grids evenly and restore compact hover/focus navigation controls.
 - Replace the count and poster-size sliders with explicit menus and use a comfortable default gap.
+- Fade horizontally overflowing rows instead of ending them with a hard clipped edge.
+- Keep grid collages inside the note when Obsidian has not reported its final width yet.
+- Use stable, high-contrast Obsidian chevrons with larger pointer targets for gallery navigation.
 
 ## 1.0.1 - 2026-08-05
 

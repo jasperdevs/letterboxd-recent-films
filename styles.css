@@ -40,6 +40,43 @@
 	scrollbar-width: none;
 }
 
+.lrf-layout-strip .lrf-gallery.is-scrollable,
+.lrf-collage-scroll.is-scrollable {
+	--lrf-mask-edge: 22px;
+	mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black var(--lrf-mask-edge),
+		black calc(100% - var(--lrf-mask-edge)),
+		transparent 100%
+	);
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black var(--lrf-mask-edge),
+		black calc(100% - var(--lrf-mask-edge)),
+		transparent 100%
+	);
+}
+
+.lrf-layout-strip .lrf-gallery.is-scrollable.is-scroll-start,
+.lrf-collage-scroll.is-scrollable.is-scroll-start {
+	mask-image: linear-gradient(to right, black 0, black calc(100% - var(--lrf-mask-edge)), transparent 100%);
+	-webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - var(--lrf-mask-edge)), transparent 100%);
+}
+
+.lrf-layout-strip .lrf-gallery.is-scrollable.is-scroll-end,
+.lrf-collage-scroll.is-scrollable.is-scroll-end {
+	mask-image: linear-gradient(to right, transparent 0, black var(--lrf-mask-edge), black 100%);
+	-webkit-mask-image: linear-gradient(to right, transparent 0, black var(--lrf-mask-edge), black 100%);
+}
+
+.lrf-layout-strip .lrf-gallery.is-scrollable.is-scroll-start.is-scroll-end,
+.lrf-collage-scroll.is-scrollable.is-scroll-start.is-scroll-end {
+	mask-image: none;
+	-webkit-mask-image: none;
+}
+
 .lrf-gallery::-webkit-scrollbar,
 .lrf-collage-scroll::-webkit-scrollbar {
 	display: none;
@@ -157,7 +194,7 @@ body.theme-light .lrf-skeleton {
 }
 
 .lrf-collage-scroll {
-	cursor: grab;
+	cursor: default;
 	overflow-x: auto;
 	overflow-y: hidden;
 	overscroll-behavior-x: contain;
@@ -165,26 +202,33 @@ body.theme-light .lrf-skeleton {
 	scrollbar-width: none;
 }
 
-.lrf-collage-scroll:active {
+.lrf-collage-scroll.is-scrollable {
+	cursor: grab;
+}
+
+.lrf-collage-scroll.is-scrollable:active {
 	cursor: grabbing;
 }
 
 .lrf-collage-wrap {
 	display: block;
 	margin-inline: auto;
-	max-width: none;
+	max-width: 100%;
 	position: relative;
-	width: max-content;
+}
+
+.lrf-layout-strip .lrf-collage-wrap {
+	max-width: none;
 }
 
 .lrf-collage-image {
 	border-radius: var(--lrf-radius);
 	display: block;
 	height: auto;
-	max-width: none;
+	max-width: 100%;
 	outline: 1px solid rgba(255, 255, 255, 0.1);
 	outline-offset: -1px;
-	width: auto;
+	width: 100%;
 }
 
 body.theme-light .lrf-collage-image {
@@ -234,26 +278,31 @@ body.theme-light .lrf-collage-image {
 
 .lrf-page-button {
 	align-items: center;
-	background: var(--background-primary-alt);
-	border: 1px solid var(--background-modifier-border);
+	backdrop-filter: blur(8px);
+	background: rgba(18, 18, 18, 0.82);
+	border: 0;
 	border-radius: 999px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-	color: var(--text-normal);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 3px 12px rgba(0, 0, 0, 0.28);
+	color: #fff;
 	cursor: pointer;
 	display: flex;
 	font-family: var(--font-interface);
-	font-size: 25px;
-	font-weight: 400;
-	height: 34px;
+	height: 42px;
 	justify-content: center;
-	min-width: 34px;
-	padding: 0 0 2px;
+	min-width: 42px;
+	padding: 0;
 	pointer-events: auto;
 	position: absolute;
 	top: 50%;
 	transform: translateY(-50%);
-	transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease;
-	width: 34px;
+	transition: background-color 120ms ease, box-shadow 120ms ease, opacity 120ms ease, scale 120ms ease;
+	width: 42px;
+}
+
+.lrf-page-button svg {
+	height: 20px;
+	stroke-width: 2.25;
+	width: 20px;
 }
 
 .lrf-page-previous {
@@ -269,11 +318,12 @@ body.theme-light .lrf-collage-image {
 }
 
 .lrf-page-button:hover {
-	background: var(--background-modifier-hover);
+	background: rgba(18, 18, 18, 0.94);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 4px 16px rgba(0, 0, 0, 0.34);
 }
 
 .lrf-page-button:active {
-	transform: translateY(-50%) scale(0.94);
+	scale: 0.96;
 }
 
 .lrf-page-button:focus-visible {
